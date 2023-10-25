@@ -5,7 +5,7 @@ This is a micro-kernel implementation entirely depends on sel4.
 - [seL4-manual](https://sel4.systems/Info/Docs/seL4-manual-latest.pdf "sel4-manual")
 
 ## TODOs
-- [ ] add marcos to set or get objects
+- [ ] fix structers with bitfield
 - [ ] implement the send_api and reveive api
 - [ ] implement the notification
 - [ ] implement the interrupts
