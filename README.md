@@ -8,6 +8,7 @@ This is a micro-kernel implementation entirely depends on sel4.
 - [ ] fix structers with bitfield
 - [ ] implement the send_api and reveive api
 - [ ] implement the notification
+- [ ] implement the cnode
 - [ ] implement the interrupts
 - [ ] implement the untyped
 - [ ] mix the code with mmu
