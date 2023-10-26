@@ -4,8 +4,6 @@
 #include "tcb.h"
 #include "structures.h"
 
-#define cap_endpoint_cap_get_capEPPtr(cap) (cap.low&MASK(48))
-
 void send_ipc(bool_t blocking, bool_t do_call, u64 badge,
               bool_t canGrant, bool_t canGrantReply, 
               tcb_t* thread, endpoint_t* epptr){
@@ -26,17 +24,17 @@ void send_ipc(bool_t blocking, bool_t do_call, u64 badge,
       tcb_t* dest;
 
       // Get the head of the endpoint queue
-      queue = ep_ptr_get_queue(epptr);
+      queue = epptr_get_queue(epptr);
       dest = queue.head;
       
       // Haskell error "Receive endpoint queue must not be empty"
       //assert(dest);
 
       queue = tcb_ep_dequeue(dest, queue);
-      ep_ptr_set_queue(epptr, queue);
+      epptr_set_queue(epptr, queue);
 
       if(!queue.head){
-        ep_ptr_set_state(epptr, EPState_Idle);
+        epptr->state = EPState_Idle;
       }
 
       bool_t reply_can_grant = thread_state_ptr_get_blocking_ipc_can_grant(&dest->tcbstate);
@@ -57,17 +55,18 @@ void receive_ipc(tcb_t* thread, cap_t cap, boot_t isBlocking){
   endpoint_t* epptr;
   notification_t* ntfnPtr;
   
-  // Haskell error
-  //assert(cap_get_capType(cap) == cap_endpoint_cap)
+  //if(unlikely(cap.capType != cap_endpoint_cap))
+    //panic();
   
-  epptr = EP_PTR(cap_endpoint_cap_get_capEPPtr(cap));
+  endpoint_cap_t endpoint_cap = (endpoint_cap)cap;
+  epptr = EP_PTR(endpoint_cap.capEPPtr);
 
   ntfnPtr = thread->tcb_bound_notification;
-  if(ntfnPtr && notification_ptr_get_state(ntfnPtr) == NtfnState_Active){
+  if(ntfnPtr && ntfnPtr->state == NtfnState_Active){
 
   }
   else{
-    switch(enpoint_pte_get_state(epptr)){
+    switch(epptr->state){
       case EPState_Idle:
       case EPState_Recv:
         tcb_queue_t queue;
@@ -83,19 +82,20 @@ void receive_ipc(tcb_t* thread, cap_t cap, boot_t isBlocking){
         bool_t canGrantReply;
         bool_t do_call;
 
-        queue = ep_ptr_get_queue(epptr);
+        queue = epptr_get_queue(epptr);
         sender = queue.head;
 
         // Haskell
         // assert(sender);
 
         queue = tcb_ep_dequeue(sender, queue);
-        ep_ptr_set_queue(epptr, queue);
+        epptr_set_queue(epptr, queue);
 
         if(!queue.head){
-          ep_ptr_set_state(epptr, EPState_Idle);
+          epptr->state = EPState_Idle;
         }
-
+        
+        // Get sender IPC details
         badge = thread_state_ptr_get_blockingIPCBadge(&sender->tcb_state);
         canGrant = thread_state_ptr_get_blockingIPCCanGrant(&sender->tcb_state);
         canGrantReply = thread_state_ptr_get_blockingIPCCanGrantReply(&sender->tcb_state);

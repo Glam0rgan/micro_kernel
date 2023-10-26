@@ -1,4 +1,3 @@
-#include "types.h"
 #include "structures.h"
 
 extern __thread ipc_buffer* __os_ipc_buffer;

@@ -1,5 +1,3 @@
-#include "types.h"
-#include "failures.h"
 #include "structures.h"
 
 struct lookup_slot_ret{

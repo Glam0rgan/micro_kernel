@@ -1,4 +1,5 @@
 #include "types.h"
+#include "arch/object/structures.h"
 
 #define wordRadix 6
 #define CTE_PTR(r) ((cte_t *)(r))
@@ -149,7 +150,7 @@ typedef struct{
   u64 padding;
 
   u64 : 62;
-  u64 field lufType : 2;
+  u64 lufType : 2;
 } invalid_root_t;
 
 typedef struct{
@@ -282,7 +283,7 @@ struct tcb{
 typedef struct tcb tcb_t;
 
 typedef struct ipc_buffer_{
-  message_info tag;
+  message_info_t tag;
   u64 msg[msg_max_length];
   u64 user_data;
   u64 caps_or_badges[msg_max_extra_caps];
@@ -311,6 +312,6 @@ enum cap_tag {    cap_null_cap = 0,    cap_untyped_cap = 2,    cap_endpoint_cap 
 // Capability table entry
 struct cte{
   cap_t cap;
-  mdb_node cteMBDNode;
+  mdb_node_t cteMBDNode;
 };
 typedef struct cte cte_t;

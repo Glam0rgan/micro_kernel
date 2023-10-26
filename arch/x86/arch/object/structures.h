@@ -1,3 +1,4 @@
+#include "arch/machine/registerset.h"
 typedef struct arch_tcb{
   user_context_t tcb_context;
 #ifdef CONFIG_VTX

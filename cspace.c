@@ -1,26 +1,14 @@
-#include "failures.h"
 #include "types.h"
+#include "failures.h"
 #include "cspace.h"
 #include "util.h"
 
-u64 cap_cnode_cap_get_capCNodeRadix(cap_t node_cap){
-  return (node_cap.low >> 47) & MASK(6);  
+lookupCap_ret_t lookup_cap(tch_t* thread, cptr_t cPtr){
+
 }
 
-u64 cap_cnode_cap_get_capCGuardSize(cap_t node_cap){
-  return (node_cap.low >> 53) & MASK(6);  
-}
-
-u64 cap_cnode_cap_get_capCnodeGuard(cap_t node_cap){
-  return node_cap.high;
-}
-
-u64 cap_cnode_cap_get_capCNodePtr(cap_t node_cap){
-  return node_cap.low & MASK(47);
-}
-
-u64 cap_get_capType(cap_t cap){
-  return cap.low >> 59;
+lookupSlot_raw_ret_t lookup_slot(tch_t* thread, cptr_t capptr){
+  
 }
 
 resolve_address_bits_ret_t resolve_address_bits(cap_t node_cap, cptr_t cap_ptr, u64 n_bits){
@@ -40,13 +28,13 @@ resolve_address_bits_ret_t resolve_address_bits(cap_t node_cap, cptr_t cap_ptr, 
   cnode_cap_t cnode_cap = (cnode_cap_t)node_cap;
 
   while(1){
-    radix_bits = cap_cnode_cap_get_capCNodeRadix(node_cap);
-    guard_bits = cap_cnode_cap_get_capCGuardSize(node_cap);
+    radix_bits = node_cap.capCNodeRadix;
+    guard_bits = node_cap.capCGuardSize;
     level_bits = radix_bits + guard_bits;
 
     // assert(level_bits != 0);
 
-    cap_guard = cap_cnode_cap_get_capCnodeGuard(node_cap);
+    cap_guard = node_cap.capCnodeGuard;
 
     guard = (cap_ptr >> ((n_bits - guard_bits) & MASK(wordRadix))) & MASK(guard_bits);
 
@@ -61,7 +49,7 @@ resolve_address_bits_ret_t resolve_address_bits(cap_t node_cap, cptr_t cap_ptr, 
     }
 
     offset = (cap_ptr >> (n_bits - level_bits)) & MASK(radix_bits);
-    slot = CTE_PTR(cap_cnode_cap_get_capCNodePtr(node_cap)) + offset;
+    slot = CTE_PTR(node_cap.capCNodePtr) + offset;
 
     if(likely(n_bits <= level_bits)){
       ret.status = EXCEPTION_NONE;
@@ -73,7 +61,7 @@ resolve_address_bits_ret_t resolve_address_bits(cap_t node_cap, cptr_t cap_ptr, 
     n_bits -= level_bits;
     node_cap = slot->cap;
     
-    if(unlikely(cap_get_capType(node_cap) != cap_cnode_cap)){
+    if(unlikely(node_cap.capType != cap_cnode_cap)){
       ret.status = EXCEPTION_NONE;
       ret.slot = slot;
       ret.bits_remaining = n_bits;

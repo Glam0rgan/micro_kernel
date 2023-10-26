@@ -1,3 +1,6 @@
+
+#define CONFIG_XSAVE_SIZE 0
+#define N_CONTEXT_REGISTERS 0
 // x86 fpu context
 struct user_fpu_state{
   u8 state[CONFIG_XSAVE_SIZE];
@@ -11,4 +14,4 @@ struct user_context{
 #if defined(ENABLE_SMP_SUPPORT) && defined(CONFIG_ARCH_IA32)
   u64 kernel_sp;
 #endif
-}
+};
