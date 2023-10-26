@@ -32,10 +32,12 @@ resolve_address_bits_ret_t resolve_address_bits(cap_t node_cap, cptr_t cap_ptr, 
   ret.bits_remaining = n_bits;
   ret.slot = NULL;
 
-  if(unlikely(cap_get_capType(node_cap) != cap_cnode_cap)){
+  if(unlikely(node_cap.capType != cap_cnode_cap)){
     // invalid_root_fault
     return ret;
   }
+               
+  cnode_cap_t cnode_cap = (cnode_cap_t)node_cap;
 
   while(1){
     radix_bits = cap_cnode_cap_get_capCNodeRadix(node_cap);

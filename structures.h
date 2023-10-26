@@ -5,23 +5,7 @@
 #define EP_PTR(r) ((endpoint_t *)(r))
 typedef u64 seL4_CapRights;
 
-struct two_u64_structs{
-  u64 high;
-  u64 low;
-};
-
-struct three_u64_structs{
-  u64 high;
-  u64 mid;
-  u64 low;
-}
-
-struct four_u64_structs{
-  u64 high_high; // the highest address
-  u64 high_low;
-  u64 low_high;
-  u64 low_low;   // the lowest address
-};
+// High means to calculate from the high bit
 
 // thread state
 enum _thread_state{
@@ -36,102 +20,238 @@ enum _thread_state{
 };
 typedef u64 _thread_state_t;
 
-/*
-  struct notification{
-    padding 16
-    ntfnBoundTCB 48
+typedef struct{
+  u64 padding;
+  u64 capType : 5;
+  u64 : 5;
+} null_cap_t;
 
-    ntfnMsgIdentifier 64
+typedef struct {
+  u64 capEPBadge;
+  u64 capType : 5;
+  u64 capCanGrantReply : 1;
+  u64 capCanGrant : 1;
+  u64 capCanReceive : 1;
+  u64 capCanSend : 1;
+  u64 padding : 7;
+  u64 capEPPtr : 48; // high
+} endpoint_cap_t;
 
-    padding 16
-    ntfnQueue_head 48
+typedef struct{
+  u64 capFreeIndex : 48;
+  u64 : 9;
+  u64 capIsDevice : 1;
+  u64 capBlockSize : 6;
+  u64 capType : 5;
+  u64 : 11;
+  u64 capPtr : 48; // high
+  
+} untyped_cap_t;
 
-    ntfnQueue_tail 48
-    padding 14
+typedef struct{
+  u64 capNtfnBadge;
+  u64 capType : 5;
+  u64 capNtfnCanReceive : 1;
+  u64 capNtfnCanSend : 1;
+  u64 : 9;
+  u64 capNtfnPtr : 48; // high
+} notification_cap_t;
 
-    state 2
-  }
+typedef struct{
+  u64 caoTCBPtr;
 
-  struct cnode_cap{
-    capCNodeGuard 64
-    capType 5
-    capCNodeGuardSize 6
-    capCNodeRadix 6
-    capCNodePtr 47
-  }
+  u64 capType : 5;
+  u64 : 57;
+  u64 caoReplyCanGrant : 1;
+  u64 canReplyMaster : 1;
+} reply_cap_t;
 
-  struct mdb_node{
-    padding 16
-    mdbnext 46
-    mdbrevocable 1
-    mdbfirst badeged 1
-    mdbprev 64
-  }
+// The user-visible format of the data word is defined by cnode_capdata, below.
+typedef struct{
+  u64 capCNodeGuard;
+  u64 capType : 5;
+  u64 capCNodeGuardSize : 6;
+  u64 capCNodeRadix : 6;
+  u64 capCNodePtr : 47; // high
+} cnode_cap_t;
 
-  struct endpoint_cap{
-    capEPBadge 64
-    capType 5
-    capCanGrantReply 1
-    capCanGrant 1
-    capCanSend 1
-    padding 7
-    capEPPtr 48
-  }
+typedef struct{
+  u64 padding;
 
-  struct endpoint{
-    epQueue_head 64
-    padding 16
-    epQueue_tail 46
-    state 2
-  }
+  u64 capType : 5;
+  u64 : 11;
+  u64 capTCBPtr : 48; // high
 
-  struct message_info{
-    label 52
-    capsUnwrapped 3
-    extraCaps 2
-    length 7
-  }
-*/
-typedef u64 message_info;
+} thread_cap_t;
 
-typedef struct two_u64_structs cnode_cap_t;
-typedef struct two_u64_structs endpoint_cap_t;
-typedef struct two_u64_structs endpoint_t;
-typedef struct two_u64_structs mdb_node_t;
-typedef struct two_u64_structs cap_t;
+typedef struct{
+  u64 padding;
 
+  u64 capType : 5;
+  u64 : 59;
+} irq_control_cap_t;
 
-typedef struct four_u64_structs notification_t;
+typedef struct{
+  u64 capIRQ;
 
+  u64 cap_Type : 5;
+  u64 : 59;
+} irq_handler_cap_t;
 
+typedef struct{
+  u64 capZombieID;
 
-/*
-struct thread_state{
-    blocking_ipc_badge 64
-    padding 60
-    blocking_ipc_canGrant 1
-    blocking_ipc_cangrantreply 1
-    blocking_ipc_iscall 1
-    tcb_queue 1
-    padding 16
-    blockingObject 44
-    tsType 4
-};
+  u64 capType : 5;
+  u64 : 52;
+  u64 capZombieType : 7;
+} zombie_cap_t;
 
-*/
-typedef struct three_u64_structs thread_state_t;
-#define thread_state_ptr_set_tsType(tcbState, state) 
-#define thread_state_ptr_set_blockingObject(tcbState, blockingObject)
-#define  
+typedef struct{
+  u64 padding;
+
+  u64 capType : 5;
+  u64 : 59;
+} domain_cap_t;
+
+// end 
+
+// Enpoint size = 16 bytes
+typedef struct{
+  u64 epQueue_head;
+  u64 padding : 16;
+  u64 epQueue_tail : 46; // high
+  u64 state : 2;
+} endpoint_t;
+
+// Async endpoint size = 32 bytes
+typedef struct{
+  u64 : 16;
+  u64 ntfnBoundTCB : 48; // high
+  u64 ntfnMsgIdentifier;
+  u64 : 16;
+  u64 ntfnQueue_head : 48; // high
+  u64 ntfnQueue_tail : 48; // high
+  u64 : 14;
+  u64 state : 2;
+} notification_t;
+
+// Mapping database node
+typedef struct{
+  u64 : 16;
+  u64 mdbNext : 46; // high
+  u64 mdbRevocable : 1;
+  u64 mdbFirstBadged : 1;
+  u64 mdbprev;
+} mdb_node_t;
+
+// Lookup fault: size = 16 bytes
+typedef struct{
+  u64 padding;
+
+  u64 : 62;
+  u64 field lufType : 2;
+} invalid_root_t;
+
+typedef struct{
+  u64 paddintg;
+
+  u64 : 55;
+  u64 bitsLeft : 7;
+  u64 lufType : 2;
+} missing_capability_t;
+
+typedef struct{
+  u64 padding;
+
+  u64 : 48;
+  u64 bitsFound : 7;
+  u64 bitsLeft : 7;
+  u64 lufType : 2;
+} depth_mismatch_t;
+
+typedef struct{
+  u64 guardFound; 
+
+  u64 : 48;
+  u64 bitsLeft : 7;
+  u64 bitsFound : 7;
+  u64 lufType : 2;
+} guard_mismatch_t;
+
+enum lufType{
+  invalid_root = 0,
+  missing_capability,
+  depth_mismatch,
+  guard_mismatch
+}
+
+// Fault: size = 16 bytes
+typedef struct{
+  u64 padding;
+
+  u64 : 60;
+  u64 os_FaultType : 4;
+} NullFault_t;
+
+typedef struct{
+  u64 address;
+
+  u64 inReceivePhase : 1;
+  u64 : 59;
+  u64 os_FaultType : 4;
+} CapFault_t;
+
+typedef struct{
+  u64 syscallNumber;
+
+  u64 : 60;
+  u64 os_FaultType : 4;
+} UnknownSyscall_t;
+
+typedef struct{
+  u64 padding;
+
+  u64 number : 32;
+  u64 code : 28;
+  u64 os_FaultType : 4;
+} UserException_t;
+
+// Thread state size = 24 bytes
+typedef struct{
+  u64 blocking_ipc_badge;
+  u64 : 60;
+  u64 blocking_ipc_canGrant : 1;
+  u64 blocking_ipc_cangrantreply : 1;
+  u64 blocking_ipc_iscall : 1;
+  u64 tcb_queue : 1;
+  u64 padding : 16;
+  u64 blockingObject : 44;
+  u64 tsType : 4;
+} thread_state_t;
+
+// Universal capability
+typedef struct{
+  u64 capEPBadge;
+  u64 capEPPtr : 48;
+  u64 capType : 5;
+  u64 left : 59;
+} cap_t;
+
+typedef struct{
+  u64 label : 52;
+  u64 capsUnwrapped : 3;
+  u64 extraCaps : 2;
+  u64 length : 7;
+} message_info_t;
 
 struct tcb{
   // arch specific tcb state
   arch_tcb_t tcb_arch;
 
   // thread state 3 u64
-  thread_state_t tcb_state;
+  thread_state tcb_state;
 
-  notification_t* tcb_bound_notification;
+  notification* tcb_bound_notification;
 
   os_fault_t tcb_fault;
 
@@ -176,11 +296,7 @@ enum endpoint_state{
   EPState_Send = 1,
   EPState_Recv = 2
 };
-typedef u64 endpoint_state_t;
-
-struct cap{    
-  u64 words[2];
-};
+typedef u64 endpoint_state;
 
 enum cap_tag {    cap_null_cap = 0,    cap_untyped_cap = 2,    cap_endpoint_cap = 4,    
   cap_notification_cap = 6,    cap_reply_cap = 8,    
@@ -191,8 +307,10 @@ enum cap_tag {    cap_null_cap = 0,    cap_untyped_cap = 2,    cap_endpoint_cap 
   cap_irq_control_cap = 14,    cap_irq_handler_cap = 30,    
   cap_zombie_cap = 46,    cap_domain_cap = 62};
 
+// cdt -> capability derivation tree
+// Capability table entry
 struct cte{
   cap_t cap;
-  mdb_node_t cteMBDNode;
+  mdb_node cteMBDNode;
 };
 typedef struct cte cte_t;
