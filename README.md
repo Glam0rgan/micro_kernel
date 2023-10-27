@@ -13,6 +13,7 @@ This is a micro-kernel implementation entirely depends on sel4.
 - [ ] implement the interrupts
 - [ ] implement the untyped
 - [ ] mix the code with mmu
+- [ ] implement the smp
 - [ ] arch
 - [ ] arrange the files
 - [ ] libs
