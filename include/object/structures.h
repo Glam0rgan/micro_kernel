@@ -4,6 +4,26 @@
 #define wordRadix 6
 #define CTE_PTR(r) ((cte_t *)(r))
 #define EP_PTR(r) ((endpoint_t *)(r))
+
+// We would like the actual 'tcb' region (the portion that contains the tcb_t) of the tcb
+// to be as large as possible, but it still needs to be aligned. As the TCB object contains
+// two sub objects the largest we can make either sub object whilst preserving size alignment
+// is half the total size. To halve an object size defined in bits we just subtract 1
+//
+// A diagram of a TCB kernel object that is created from untyped:
+//  _______________________________________
+// |     |             |                   |
+// |     |             |                   |
+// |cte_t|   unused    |       tcb_t       |
+// |     |(debug_tcb_t)|                   |
+// |_____|_____________|___________________|
+// 0     a             b                   c
+// a = tcbCNodeEntries * sizeof(cte_t)
+// b = BIT(TCB_SIZE_BITS)
+// c = BIT(os_TCBBits)
+// Generate a cte_t pointer from a tcb_t pointer
+#define TCB_PTR_CTE_PTR(p,i)\
+  (((cte_t*)((u64)(p)&~MASK(os_TCBBits)))+(i))
 typedef u64 seL4_CapRights;
 
 // High means to calculate from the high bit
@@ -20,6 +40,26 @@ enum _thread_state{
   ThreadState_IdleThreadState
 };
 typedef u64 _thread_state_t;
+
+// A TCB CNode and a TCB are always allocated togethor, and addjacently.
+enum tcb_cnode_index{
+  // CSpace root 
+  tcbCTable = 0,
+
+  // VSpace root
+  tcbVtable = 1,
+
+  // Reply cap slot
+  tcbReply = 2,
+
+  // TCB of most recent IPC sender
+  tcbCaller = 3,
+
+  // IPC buffer cap slot
+  tcbBuffer = 4,
+
+  tcbCNodeEntries,
+}
 
 typedef struct null_cap{
   u64 padding;
@@ -322,3 +362,19 @@ struct cte{
   mdb_node_t cteMBDNode;
 };
 typedef struct cte cte_t;
+
+static inline u64 CONST generic_frame_cap_get_capFIsDevice(cap_t cap){
+  cap_tag_t ctag;
+
+  ctag = cap.capType;
+  /*if(ctag != cap_small_frame_cap && 
+       ctag != cap_frame_cap)
+      panic();
+  */
+  if(ctag == cap_small_frame_cap){
+    return cap_small_frame_cap_get_capFIsDevice(cap);
+  } 
+  else{
+    return cap_frame_cap_get_capFIsDevice(cap);
+  }    
+}

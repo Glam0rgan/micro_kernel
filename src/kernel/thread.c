@@ -5,9 +5,9 @@
 
 void do_ipc_transfer(tcb_t* sender, endpoint_t* endpoint,
                      u64 badge, bool_t grant, tcb_t* receiver){
-  void *receiverBUffer, *senderBuffer;
-
-    
+  void *receiveBuffer, *sendBuffer;
+  
+  receiveBuffer = lookup_ipc_buffer(true, receiver);  
 }
 
 void schedule_tcb(tcb_t* tptr){

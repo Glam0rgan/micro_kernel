@@ -52,7 +52,7 @@ void send_ipc(bool_t blocking, bool_t do_call, u64 badge,
       }
       
       // Do the transfer
-      doIPCTransfer(thread, epptr, badge, canGrant, dest);
+      do_ipc_transfer(thread, epptr, badge, canGrant, dest);
 
       bool_t replyCanGrant = (&dest->tcbState)->blockingIPCCanGrant;
 
