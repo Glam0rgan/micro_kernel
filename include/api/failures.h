@@ -1,5 +1,5 @@
 typedef u64 exception_t;
-enum exception{
+enum exception {
   EXCEPTION_NONE,
   EXCEPTION_FAULT,
   EXCEPTION_LOOKUP_FAULT,
