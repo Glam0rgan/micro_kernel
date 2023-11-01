@@ -2,6 +2,63 @@
 #include "util.h"
 #include "tcb.h"
 
+extra_caps_t current_extra_caps;
+
+
+exception_t lookup_extra_caps(tcb_t* thread, u64* bufferPtr, message_info_t info){
+  lookup_slot_raw_ret_t lu_ret;
+  cptr_t cptr;
+  u64 i, length;
+  
+  // If the buffer pointer is Null, set the extra_caps
+  // Null and return.
+  if(!bufferPtr){
+    current_extra_caps.excaprefs[0] = NULL;
+    return EXCEPTION_NONE;
+  }
+  
+  // The length is 2 bits.
+  length = info.extraCaps;
+  
+  for(i = 0; i < length ; i++){
+    cptr = get_extra_cptr(bufferPtr, i);
+
+    lu_ret = lookup_slot(thread, cptr);
+
+  }
+}
+
+lookup_slot_raw_ret_t lookup_slot(tcb_t* thread, cptr_t capptr){
+  cap_t threadRoot;
+  resolveAddressBits_ret_t res_ret;
+  lookup_slot_raw_ret_t ret;
+
+  threadRoot = TCB_PTR_CTE_PTR(thread, tcbCTable)->cap;
+}
+
+// Copy IPC MRs from one thread to another
+u64 copyMRs(tcb_t* sender, u64* sendBuf, tcb_t* receiver,
+            u64* recvBuf, u64 n){
+  u64 i;
+
+  // Copy inline words (in registers)
+  for(i = 0; i < n && i < n_msgRegisters; i++){
+    setRegister();
+  }
+
+  // Don't have recvBuf or sendBuf, should return.  
+  if(!recvBuf || !sendBuf){
+    return i;
+  }
+
+  // Copy out-of-line words (in memory)
+  for(; i < n ; i++){
+    recvBuf[i + 1] = sendBuf[i + 1];
+  }
+
+  return i;
+}
+
 void setup_caller_cap(tcb_t* sender, tcb_t* receiver, bool_t canGrant){
 
 }
@@ -35,4 +92,12 @@ tcb_queue_t tcb_ep_dequeue(tcb_t* tcb, tcb_queue_t queue){
   }
 
   return queue;
+}
+
+// Get the capability pointer position i in buffer
+cptr_t PURE get_extra_cptr(u64* bufferPtr, u64 i){
+  // The buffer structer
+  // tag(8 bytes) msg(8* os_MsgMaxLength bytes ) user_data(8 byrtes)
+  // caps_or_badges
+  return (cptr_t)bufferPtr[os_MsgMaxLength + 2 + i];
 }

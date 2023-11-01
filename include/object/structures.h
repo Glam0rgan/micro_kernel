@@ -42,6 +42,7 @@ enum _thread_state{
 typedef u64 _thread_state_t;
 
 // A TCB CNode and a TCB are always allocated togethor, and addjacently.
+// The CNode comes first.
 enum tcb_cnode_index{
   // CSpace root 
   tcbCTable = 0,
@@ -278,13 +279,14 @@ typedef struct cap{
   u64 left : 59;
 } cap_t;
 
-typedef struct message_info{
+typedef struct os_message_info{
   u64 label : 52;
   u64 capsUnwrapped : 3;
   u64 extraCaps : 2;
   u64 length : 7;
-} message_info_t;
+} os_message_info_t;
 
+// Thread control block
 struct tcb{
   // arch specific tcb state
   arch_tcb_t tcbArch;

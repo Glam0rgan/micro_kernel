@@ -24,6 +24,7 @@
 
 #ifndef __ASSEMBLER__
 
-#define PURE __attribute__((__pure__))
+#define CONST    __attribute__((__pure__))
+#define PURE     __attribute__((__pure__))
 
 #endif
