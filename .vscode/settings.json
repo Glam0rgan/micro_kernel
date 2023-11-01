@@ -15,5 +15,9 @@
     "C_Cpp.vcFormat.newLine.beforeCatch": false,
     "C_Cpp.vcFormat.newLine.beforeElse": false,
     "C_Cpp.vcFormat.space.afterKeywordsInControlFlowStatements": false,
-    "C_Cpp.vcFormat.space.beforeBlockOpenBrace": false,
+    "files.associations": {
+        "*.json": "jsonc",
+        "stdbool.h": "c",
+        "util.h": "c"
+    },
 }

@@ -1,4 +1,5 @@
 #include <types.h>
+#include <ctypes.h>
 #include <arch/object/structures.h>
 
 #define wordRadix 6
@@ -60,7 +61,7 @@ enum tcb_cnode_index {
   tcbBuffer = 4,
 
   tcbCNodeEntries,
-}
+};
 
 typedef struct null_cap {
   u64 padding;
@@ -375,10 +376,9 @@ static inline u64 CONST generic_frame_cap_get_capFIsDevice(cap_t cap) {
        ctag != cap_frame_cap)
       panic();
   */
-  if (ctag == cap_small_frame_cap) {
+  if(ctag == cap_small_frame_cap) {
     return cap_small_frame_cap_get_capFIsDevice(cap);
-  }
-  else {
+  } else {
     return cap_frame_cap_get_capFIsDevice(cap);
   }
 }

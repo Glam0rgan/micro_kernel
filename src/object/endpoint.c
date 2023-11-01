@@ -1,4 +1,5 @@
-#include "types.h"
+#include <types.h>
+#include <ctypes.h>
 #include "structures.h"
 #include "endpoint.h"
 #include "cnode.h"
@@ -9,10 +10,10 @@
 void send_ipc(bool_t blocking, bool_t do_call, u64 badge,
   bool_t canGrant, bool_t canGrantReply,
   tcb_t* thread, endpoint_t* epptr) {
-  switch (ep_ptr_get_state(epptr)) {
+  switch(ep_ptr_get_state(epptr)) {
   case EPState_Idle:
   case EPState_Send:
-    if (blocking) {
+    if(blocking) {
       tcb_queue_t queue;
 
       // Set thread state to BlockedOnSend
@@ -48,7 +49,7 @@ void send_ipc(bool_t blocking, bool_t do_call, u64 badge,
     queue = tcb_ep_dequeue(dest, queue);
     epptr_set_queue(epptr, queue);
 
-    if (!queue.head) {
+    if(!queue.head) {
       epptr->state = EPState_Idle;
     }
 
@@ -60,11 +61,10 @@ void send_ipc(bool_t blocking, bool_t do_call, u64 badge,
     set_thread_state(dest, ThreadState_Running);
     possible_switch_to(dest);
 
-    if (do_call) {
-      if (canGrant || canGrantReply) {
+    if(do_call) {
+      if(canGrant || canGrantReply) {
         setup_caller_cap(thread, dest, replyCanGrant);
-      }
-      else {
+      } else {
         set_thread_state(thread, ThreadState_Inactive);
       }
     }
@@ -85,15 +85,14 @@ void receive_ipc(tcb_t* thread, cap_t cap, bool_t isBlocking) {
   epptr = EP_PTR(endpoint_cap.capEPPtr);
 
   ntfnPtr = thread->tcbBoundNotification;
-  if (ntfnPtr && ntfnPtr->state == NtfnState_Active) {
+  if(ntfnPtr && ntfnPtr->state == NtfnState_Active) {
 
-  }
-  else {
-    switch (epptr->state) {
+  } else {
+    switch(epptr->state) {
     case EPState_Idle:
     case EPState_Recv:
       tcb_queue_t queue;
-      if (isBlocking) {
+      if(isBlocking) {
         // Set thread state to BlockedOnReveive
 
       }
@@ -114,7 +113,7 @@ void receive_ipc(tcb_t* thread, cap_t cap, bool_t isBlocking) {
       queue = tcb_ep_dequeue(sender, queue);
       epptr_set_queue(epptr, queue);
 
-      if (!queue.head) {
+      if(!queue.head) {
         epptr->state = EPState_Idle;
       }
 
@@ -127,15 +126,13 @@ void receive_ipc(tcb_t* thread, cap_t cap, bool_t isBlocking) {
 
       do_call = thread_state_ptr_get_blockingIPCIsCall(&sender->tcb_state);
 
-      if (do_call) {
-        if (canGrant || canGrantReply) {
+      if(do_call) {
+        if(canGrant || canGrantReply) {
+
+        } else {
 
         }
-        else {
-
-        }
-      }
-      else {
+      } else {
 
       }
       break;
