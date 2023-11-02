@@ -1,12 +1,9 @@
 #include <types.h>
 #include <ctypes.h>
-#include "failures.h"
-#include "cspace.h"
-#include "util.h"
-
-lookupCap_ret_t lookup_cap(tch_t* thread, cptr_t cPtr) {
-
-}
+#include <failures.h>
+#include <structures.h>
+#include <cspace.h>
+#include <util.h>
 
 // Look-up slot by thread and capptr
 lookup_slot_raw_ret_t lookup_slot(tcb_t* thread, cptr_t capptr) {

@@ -1,13 +1,12 @@
-enum vm_page_size {
+enum VmPageSize {
   X86_SmallPage,
   X86_LargePage,
   X64_HugePage
 };
-typedef u64 vm_page_size_t;
 
 // Get the page bits correspond to the page size type
-static inline u64 CONST pageBitsForSize(vm_page_size_t pagesize) {
-  switch (pagesize) {
+static inline u64 CONST pageBitsForSize(VmPageSize pagesize) {
+  switch(pagesize) {
   case X86_SmallPage:
     return os_PageBits;
 

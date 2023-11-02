@@ -1,7 +1,7 @@
-enum sel4_Fault sel4_FaultType{
+enum OsFault OsFaultType {
   NullFault = 0,
   CapFault = 1,
   UnkownSyscall = 2,
-  UserException =3,
+  UserException = 3,
   VMFault = 4
 };

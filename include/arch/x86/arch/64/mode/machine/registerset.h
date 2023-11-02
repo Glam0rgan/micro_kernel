@@ -14,7 +14,7 @@
   * and sysenter have to do some juggling to make
   * things work */
 
-enum _register {
+enum Register {
   // User registers that will be preserved during syscall
   // Deliberately place the cap and badge registers early
   // So that when popping on the fastpath we can just not

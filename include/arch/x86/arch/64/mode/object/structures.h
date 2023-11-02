@@ -1,5 +1,5 @@
 // x86-64 specific cap types
-typedef struct frame_cap {
+struct FrameCap {
   // The ASID doubles as the PCI bus/dev/fun when used in an IOMMU context
   //so it is 16 instead of 12
   u64 capFMappedASID : 16;
@@ -12,4 +12,4 @@ typedef struct frame_cap {
   u64 capFVMRights : 2;
   u64 caoFIsDevice : 1;
   u64 : 4;
-} frame_cap_t;
+};

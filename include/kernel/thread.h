@@ -1,14 +1,14 @@
 
-void scheduleTCB(tcb_t* tptr);
+void schedule_tcb(Tcb* tptr);
 
-void set_thread_state(tcb_t* tptr, _thread_state_t ts);
+void set_thread_state(Tcb* tptr, _ThreadState ts);
 
-void possible_switch_to(tcb_t* tptr);
+void possible_switch_to(Tcb* tptr);
 
-void do_ipc_transfer(tcb_t* sender, enpoint_t endpoint,
-    u64 badge, bool_t grant, tcb_t* reveiver);
-void do_normal_transfer(tcb_t* sender, u64* sendBuffer, endpoint* endpoint,
-    u64 badge, bool_t canGrant, tcb_t* receiver,
+void do_ipc_transfer(Tcb* sender, Endpoint endpoint,
+    u64 badge, bool grant, Tcb* reveiver);
+void do_normal_transfer(Tcb* sender, u64* sendBuffer, Endpoint* endpoint,
+    u64 badge, bool canGrant, Tcb* receiver,
     u64* receiveBuffer);
-void do_fault_transfer(u64 badge, tcb_t* sender, tcb_t* reveiver,
+void do_fault_transfer(u64 badge, Tcb* sender, Tcb* reveiver,
     u64* reveiverIPCBuffer);

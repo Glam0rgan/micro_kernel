@@ -1,11 +1,11 @@
 #include "structures.h"
 
-extern __thread ipc_buffer* __os_ipc_buffer;
+extern __thread IpcBuffer* __OsIpcBuffer;
 
-ipc_buffer* os_get_ipc_buffer(void){
-  return __os_ipc_buffer;
+IpcBuffer* os_get_ipc_buffer(void) {
+  return __OsIpcBuffer;
 }
 
-u64 os_get_mr(int i){
+u64 os_get_mr(int i) {
   return os_get_ipc_buffer()->msg[i];
 }

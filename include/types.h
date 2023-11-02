@@ -1,10 +1,9 @@
 #include "ctypes.h"
 
 // capability pointer
-typedef u64 cptr_t;
+typedef u64 Cptr;
 
 
-struct extra_caps{
-    cte_ptr_t excaprefs[os_MsgMaxExtraCaps];
+struct ExtraCaps {
+    CtePtr excaprefs[os_MsgMaxExtraCaps];
 };
-typedef struct extra_caps extra_caps_t;
