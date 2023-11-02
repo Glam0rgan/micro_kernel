@@ -8,8 +8,8 @@
 // Get the Buffer from tcb sender anb receiver
 // next invoke do_normal_transfer if ok
 // else invoke do_fault_transfer
-void do_ipc_transfer(tcb_t* sender, endpoint_t* endpoint,
-  u64 badge, bool_t grant, tcb_t* receiver) {
+void do_ipc_transfer(Tcb* sender, Endpoint* endpoint,
+  u64 badge, bool grant, Tcb* receiver) {
   void* receiveBuffer, * sendBuffer;
 
   // Get the address of receiver
@@ -19,20 +19,20 @@ void do_ipc_transfer(tcb_t* sender, endpoint_t* endpoint,
   if(likely(sender->tcbFault.os_FaultType) == os_Fault_NullFault) {
     sendBuffer = lookup_ipc_buffer(false, sender);
     do_normal_transfer(sender, sendBuffer, endpoint, badge,
-      grant, receiver, receiverBuffer);
+      grant, receiver, receiveBuffer);
   } else {
     do_fault_transfer();
   }
 }
 
-void do_normal_transfer(tcb_t* sender, u64* sendBuffer, endpoint* endpoint,
-  u64 badge, bool_t canGrant, tcb_t* receiver,
+void do_normal_transfer(Tcb* sender, u64* sendBuffer, Endpoint* endpoint,
+  u64 badge, bool canGrant, Tcb* receiver,
   u64* receiveBuffer) {
   u64 msgTransferred;
-  os_message_info_t tag;
-  exception_t status;
+  OsMessageInfo tag;
+  Exception status;
 
-  tag = messageInfo_from_u64(getRegister(sender, msgInfoRegister));
+  tag = messageinfo_from_u64(getRegister(sender, msgInfoRegister));
 
   if(canGrant) { // If sender grant capabilities to receiver
 
@@ -51,23 +51,23 @@ void do_normal_transfer(tcb_t* sender, u64* sendBuffer, endpoint* endpoint,
   msgTransferred = copyMRs(sender, sendBuffer, receiver, receiveBuffer,
     tag.length);
 
-  tag = transferCaps(tag, endpoint, receiver, receiveBuffer);
+  tag = transfer_caps(tag, endpoint, receiver, receiveBuffer);
 
   tag.length = msgTransferred;
 
-  setRegister();
-  setRegister();
+  setRegister(receiver, msgInfoRegister, u64_from_messageinfo(msgInfo));
+  setRegister(reveiver, badgeRegister, badge);
 }
 
-void do_fault_transfer(u64 badge, tcb_t* sender, tcb_t* reveiver,
+void do_fault_transfer(u64 badge, Tcb* sender, Tcb* reveiver,
   u64* reveiverIPCBuffer) {
 
   u64 msgTransferred;
-  messageinfo_t tag;
-  exception_t status;
+  OsMessageInfo tag;
+  Exception status;
 }
 
-void schedule_tcb(tcb_t* tptr) {
+void schedule_tcb(Tcb* tptr) {
   if(tptr == NODE_STATE(ksCurThread) &&
     NODE_STATE(ksSchedulerAction) == SchedulerAction_ResumCurrentThread &&
     !isSchedulable(tptr)) {
@@ -75,10 +75,11 @@ void schedule_tcb(tcb_t* tptr) {
   }
 }
 
-static os_messageinfo_t transfer_caps(os_messageinfo_t info,
-  endpoint_t* endpoint, tcb_t* receiver, u64* receiverBuffer) {
+// Like getReceiveSlots, this is specialised for single-cap transfer.
+static OsMessageInfo transfer_caps(OsMessageInfo info,
+  Endpoint* endpoint, Tcb* receiver, u64* receiverBuffer) {
   u64 i;
-  cte_t* destSlot;
+  Cte* destSlot;
 
   info.extraCaps = 0;
   info.capsUnwrapped = 0;
@@ -90,6 +91,6 @@ static os_messageinfo_t transfer_caps(os_messageinfo_t info,
   destSlot =
 }
 
-void set_thread_state(tcb_t* tptr, _thread_state_t ts) {}
+void possible_switch_to(Tcb* tptr) {
 
-void possible_switch_to(tcb_t* tptr) {}
+}

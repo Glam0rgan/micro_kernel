@@ -2,18 +2,18 @@
 #include "util.h"
 #include "tcb.h"
 
-extra_caps_t current_extra_caps;
+ExtraCaps currentExtraCaps;
 
+Exception lookup_extra_caps(Tcb* thread, u64* bufferPtr, OsMessageInfo info) {
 
-exception_t lookup_extra_caps(tcb_t* thread, u64* bufferPtr, message_info_t info) {
-  lookup_slot_raw_ret_t lu_ret;
-  cptr_t cptr;
+  LookupSlotRawRet luRet;
+  Cptr cptr;
   u64 i, length;
 
   // If the buffer pointer is Null, set the extra_caps
   // Null and return.
   if(!bufferPtr) {
-    current_extra_caps.excaprefs[0] = NULL;
+    currentExtraCaps.excaprefs[0] = NULL;
     return EXCEPTION_NONE;
   }
 
@@ -21,11 +21,26 @@ exception_t lookup_extra_caps(tcb_t* thread, u64* bufferPtr, message_info_t info
   length = info.extraCaps;
 
   for(i = 0; i < length; i++) {
+    // Get ptr and then look-up the slot
     cptr = get_extra_cptr(bufferPtr, i);
+    luRet = lookup_slot(thread, cptr);
 
-    lu_ret = lookup_slot(thread, cptr);
+    // Check the status
+    if(luRet.status != EXCEPTION_NONE) {
+      currentFault = os_fault_capfault_new(cptr, false);
+      return luRet.status;
+    }
 
+
+    // Add slots to excaprefs
+    currentExtraCaps.excaprefs[i] = luRet.slot;
   }
+
+  if(i < os_MsgMaxExtraCaps) {
+    currentExtraCaps.excaprefs[i] = NULL;
+  }
+
+  return EXCEPTION_NONE;
 }
 
 // Copy IPC MRs from one thread to another

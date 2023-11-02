@@ -6,30 +6,30 @@
 #include <util.h>
 
 // Look-up slot by thread and capptr
-lookup_slot_raw_ret_t lookup_slot(tcb_t* thread, cptr_t capptr) {
-  cap_t threadRoot;
-  resolveAddressBits_ret_t res_ret;
-  lookup_slot_raw_ret_t ret;
+LookupSlotRawRet lookup_slot(tcb_t* thread, cptr_t capptr) {
+  Cap threadRoot;
+  ResolveAddressBitsRet resRet;
+  LookupSlotRawRet ret;
 
   // Get the cnode_cap for the root cnode address.
   threadRoot = TCB_PTR_CTE_PTR(thread, tcbCTable)->cap;
 
   // Get the status and concrete slot
-  res_ret = resolve_address_bits(threadRoot, capptr, wordBits);
+  resRet = resolve_address_bits(threadRoot, capptr, wordBits);
 
-  ret.status = res_ret.status;
-  ret.slot = res_ret.slot;
+  ret.status = resRet.status;
+  ret.slot = resRet.slot;
   return ret;
 }
 
 // Resolve address and get the status and slot 
 // n_bits is 1 << 6 in 64-bits.
 // go to the manual to see concrete process
-resolve_address_bits_ret_t resolve_address_bits(cap_t node_cap, cptr_t cap_ptr, u64 n_bits) {
-  resolve_address_bits_ret_t ret;
+ResolveAddressBitsRet resolve_address_bits(Cap node_cap, Cptr cap_ptr, u64 n_bits) {
+  ResolveAddressBitsRet ret;
   u64 radix_bits, guard_bits, level_bits, guard;
   u64 cap_guard, offset;
-  cte_t* slot;
+  Cte* slot;
 
   ret.bits_remaining = n_bits;
   ret.slot = NULL;
@@ -40,7 +40,7 @@ resolve_address_bits_ret_t resolve_address_bits(cap_t node_cap, cptr_t cap_ptr, 
   }
 
   // Cast to cnode_cap             
-  cnode_cap_t cnode_cap = (*(cnode_cap_t*)(&node_cap));
+  CNodeCap cnode_cap = (*(CNodeCap*)(&node_cap));
 
   // resolve the address
   while(1) {
