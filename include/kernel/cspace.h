@@ -1,4 +1,9 @@
 
+struct _LookupCapRet {
+  Exception status;
+  Cap cap;
+};
+typedef struct _LookupCapRet LookupCapRet;
 struct _LookupSlotRawRet {
   Exception status;
   Cte* slot;

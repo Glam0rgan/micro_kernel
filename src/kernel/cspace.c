@@ -5,7 +5,25 @@
 #include <cspace.h>
 #include <util.h>
 
-// Look-up slot by thread and capptr
+// Invoke lookup_slot to get slot.
+// Return cap.
+LookupCapRet lookup_cap(Tcb* thread, Cptr cPtr) {
+  LookupSlotRawRet luRet;
+  LookupCapRet ret;
+
+  luRet = lookup_slot(thread, cPtr);
+  if(unlikely(luRet.status != Exception_NONE)) {
+    ret.status = luRet.status;
+    ret.cap.capType = cap_null_cap;
+    return ret;
+  }
+
+  ret.status = EXCEPTION_NONE;
+  ret.cap = luRet.slot->cap;
+  return ret;
+}
+// Look-up slot by thread and capptr.
+// Return slot pointer.
 LookupSlotRawRet lookup_slot(tcb_t* thread, cptr_t capptr) {
   Cap threadRoot;
   ResolveAddressBitsRet resRet;
@@ -24,7 +42,7 @@ LookupSlotRawRet lookup_slot(tcb_t* thread, cptr_t capptr) {
 
 // Resolve address and get the status and slot 
 // n_bits is 1 << 6 in 64-bits.
-// go to the manual to see concrete process
+// go to the manual to see concrete process.
 ResolveAddressBitsRet resolve_address_bits(Cap node_cap, Cptr cap_ptr, u64 n_bits) {
   ResolveAddressBitsRet ret;
   u64 radix_bits, guard_bits, level_bits, guard;

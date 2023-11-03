@@ -56,5 +56,31 @@ Cte* get_receive_slots(Tcb* thread, u64* buffer) {
         return NULL;
     }
 
+    // Use receiver buffer to get receiver slot info
+    ct = load_cap_transfer(buffer);
+    cptr = ct.ctReceiveRoot;
 
+    lucRet = lookupCap(thread, cptr);
+    if(lucRet.status != EXCEPTION_NONE) {
+        return NULL;
+    }
+    cnode = lucRet.cap;
+
+    // 
+    lusRet = lookupTargetSlot(cnode, ct.ctReceiveIndex, ct.ctReceiveDepth);
+    if(lusRet.status != EXCEPTION_NONE) {
+        return NULL;
+    }
+    slot = lusRet.slot;
+
+    if(slot->cap.capType != cap_null_cap) {
+        return NULL;
+    }
+
+    return slot;
+}
+
+Cap_Tranfer PURE load_cap_transfer(u64* buffer) {
+    const int offset = os_MsgMaxLength + os_MsgMaxExtraCaps + 2;
+    return capTransfer_from_u64(buffer + offset);
 }
