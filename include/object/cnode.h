@@ -1,0 +1,1 @@
+Cte* get_receive_slots(Tcb* thread, u64* buffer);

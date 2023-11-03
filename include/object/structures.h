@@ -62,13 +62,13 @@ enum TcbCNodeIndex {
   tcbCNodeEntries,
 };
 
-struct NullCap {
+struct _NullCap {
   u64 padding;
   u64 capType : 5;
   u64 : 5;
 };
-
-struct EndpointCap {
+typedef struct _NullCap NullCap;
+typedef struct _EndpointCap {
   u64 capEPBadge;
   u64 capType : 5;
   u64 capCanGrantReply : 1;
@@ -77,9 +77,9 @@ struct EndpointCap {
   u64 capCanSend : 1;
   u64 padding : 7;
   u64 capEPPtr : 48; // high
-};
+} Endpoint;
 
-struct UntypedCap {
+typedef struct _UntypedCap {
   u64 capFreeIndex : 48;
   u64 : 9;
   u64 capIsDevice : 1;
@@ -88,85 +88,85 @@ struct UntypedCap {
   u64 : 11;
   u64 capPtr : 48; // high
 
-};
+} UntypedCap;
 
-struct NotificationCap {
+typedef struct _NotificationCap {
   u64 capNtfnBadge;
   u64 capType : 5;
   u64 capNtfnCanReceive : 1;
   u64 capNtfnCanSend : 1;
   u64 : 9;
   u64 capNtfnPtr : 48; // high
-};
+}Notification;
 
-struct ReplyCap {
+typedef struct _ReplyCap {
   u64 caoTCBPtr;
 
   u64 capType : 5;
   u64 : 57;
   u64 caoReplyCanGrant : 1;
   u64 canReplyMaster : 1;
-};
+}ReplyCap;
 
 // The user-visible format of the data word is defined by cnode_capdata, below.
-struct CnodeCap {
+typedef struct _CnodeCap {
   u64 capCNodeGuard;
   u64 capType : 5;
   u64 capCNodeGuardSize : 6;
   u64 capCNodeRadix : 6;
   u64 capCNodePtr : 47; // high
-};
+}CNodeCap;
 
-struct ThreadCap {
+typedef struct _ThreadCap {
   u64 padding;
 
   u64 capType : 5;
   u64 : 11;
   u64 capTCBPtr : 48; // high
 
-};
+}ThreaddCap;
 
-struct IrqControlCap {
+typedef struct _IrqControlCap {
   u64 padding;
 
   u64 capType : 5;
   u64 : 59;
-};
+}IrqControlCap;
 
-struct IrqHandlerCap {
+typedef struct _IrqHandlerCap {
   u64 capIRQ;
 
   u64 capType : 5;
   u64 : 59;
-};
+}_IrqHandlerCap;
 
-struct ZombieCap {
+typedef struct _ZombieCap {
   u64 capZombieID;
 
   u64 capType : 5;
   u64 : 52;
   u64 capZombieType : 7;
-};
+}ZombieCap;
 
-struct DomainCap {
+typedef struct _DomainCap {
   u64 padding;
 
   u64 capType : 5;
   u64 : 59;
-};
+}DomainCap;
 
 // end 
 
 // Enpoint size = 16 bytes
-struct Endpoint {
+typedef struct _Endpoint {
   u64 epQueueHead;
   u64 padding : 16;
   u64 epQueueTail : 46; // high
   u64 state : 2;
-};
+}Endpoint;
 
 // Async endpoint size = 32 bytes
-struct Notification {
+typedef struct _Notification {
   u64 : 16;
   u64 ntfnBoundTCB : 48; // high
   u64 ntfnMsgIdentifier;
@@ -175,50 +175,50 @@ struct Notification {
   u64 ntfnQueueTail : 48; // high
   u64 : 14;
   u64 state : 2;
-};
+}Notification;
 
 // Mapping database node
-struct MdbNode {
+typedef struct _MdbNode {
   u64 : 16;
   u64 mdbNext : 46; // high
   u64 mdbRevocable : 1;
   u64 mdbFirstBadged : 1;
   u64 mdbprev;
-};
+}MdbNode;
 
 // Lookup fault: size = 16 bytes
-struct InvalidRoot {
+typedef struct _InvalidRoot {
   u64 padding;
 
   u64 : 62;
   u64 lufType : 2;
-};
+}InvalidRoot;
 
-struct MissingCapability {
+typedef struct _MissingCapability {
   u64 paddintg;
 
   u64 : 55;
   u64 bitsLeft : 7;
   u64 lufType : 2;
-};
+}MissingCapability;
 
-struct DepthMismatch {
+typedef struct _DepthMismatch {
   u64 padding;
 
   u64 : 48;
   u64 bitsFound : 7;
   u64 bitsLeft : 7;
   u64 lufType : 2;
-};
+}DepthMismatch;
 
-struct GuardMismatch {
+typedef struct _GuardMismatch {
   u64 guardFound;
 
   u64 : 48;
   u64 bitsLeft : 7;
   u64 bitsFound : 7;
   u64 lufType : 2;
-};
+}GuardMismatch;
 
 enum LufType {
   invalidRoot = 0,
@@ -228,38 +228,38 @@ enum LufType {
 };
 
 // Fault: size = 16 bytes
-struct NullFault {
+typedef struct _NullFault {
   u64 padding;
 
   u64 : 60;
   u64 osFaultType : 4;
-};
+}NullFault;
 
-struct CapFault {
+typedef struct _CapFault {
   u64 address;
 
   u64 inReceivePhase : 1;
   u64 : 59;
   u64 osFaultType : 4;
-};
+}CapFault;
 
-struct UnknownSyscall {
+typedef struct _UnknownSyscall {
   u64 syscallNumber;
 
   u64 : 60;
   u64 osFaultType : 4;
-};
+}UnknowSyscall;
 
-struct UserException {
+typedef struct _UserException {
   u64 padding;
 
   u64 number : 32;
   u64 code : 28;
   u64 osFaultType : 4;
-};
+}UserException;
 
 // Thread state size = 24 bytes
-struct ThreadState {
+typedef struct __ThreadState {
   u64 blockingIPCBadge;
   u64 : 60;
   u64 blockingIPCCanGrant : 1;
@@ -269,25 +269,25 @@ struct ThreadState {
   u64 padding : 16;
   u64 blockingObject : 44;
   u64 tsType : 4;
-};
+}ThreadState;
 
 // Universal capability
-typedef struct Cap {
+typedef struct _Cap {
   u64 capEPBadge;
   u64 capEPPtr : 48;
   u64 capType : 5;
   u64 left : 59;
-};
+}Cap;
 
-struct OsMessageInfo {
+typedef struct _OsMessageInfo {
   u64 label : 52;
   u64 capsUnwrapped : 3;
   u64 extraCaps : 2;
   u64 length : 7;
-};
+}OsMessageInfo;
 
 // Thread control block
-struct tcb {
+struct _Tcb {
   // arch specific tcb state
   ArchTcb tcbArch;
 
@@ -316,14 +316,14 @@ struct tcb {
   u64 tcbAffinity;
 #endif  
 
-  struct Tcb* tcbSchedNext;
-  struct Tcb* tcbSchedPrev;
+  struct _Tcb* tcbSchedNext;
+  struct _Tcb* tcbSchedPrev;
 
-  struct Tcb* tcbEPNext;
-  struct Tcb* tcbEPPrev;
+  struct _Tcb* tcbEPNext;
+  struct _Tcb* tcbEPPrev;
 };
-
-struct IpcBuffer {
+typedef struct _Tcb Tcb;
+typedef struct _IpcBuffer {
   OsMessageInfo tag;
   u64 msg[msg_max_length];
   u64 userData;
@@ -331,7 +331,7 @@ struct IpcBuffer {
   Cptr receiveCNode;
   Cptr receiveIndex;
   Cptr receiveDepth;
-} __attribute__((__aligned__(sizeof(struct IpcBuffer_))));
+}IpcBuffer __attribute__((__aligned__(sizeof(struct IpcBuffer_))));
 
 enum EndpointState {
   EPState_Idle = 0,
@@ -358,10 +358,10 @@ enum CapTag {
 
 // cdt -> capability derivation tree
 // Capability table entry
-struct Cte {
+typedef struct _Cte {
   Cap cap;
   MdbNode cteMBDNode;
-};
+}Cte;
 
 static inline u64 CONST generic_frame_cap_get_capFIsDevice(cap_t cap) {
   CapTag ctag;

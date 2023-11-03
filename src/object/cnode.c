@@ -43,7 +43,18 @@ void cte_insert() {
 
 }
 // This implementation is specialised to the (current) limit
-// of one cap receive slot 
-cte_t* get_receive_slots(tcb_t* thread, u64* buffer) {
+// of one cap receive slot. 
+Cte* get_receive_slots(Tcb* thread, u64* buffer) {
+    CapTransfer ct;
+    Cptr cptr;
+    LookupCapRet lucRet;
+    LookupSlotRet lusRet;
+    Cte* slot;
+    Cap cnode;
+
+    if(!buffer) {
+        return NULL;
+    }
+
 
 }

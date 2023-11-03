@@ -84,11 +84,12 @@ static OsMessageInfo transfer_caps(OsMessageInfo info,
   info.extraCaps = 0;
   info.capsUnwrapped = 0;
 
+  // If extra caps is empty or don't have receive buffer.
   if(likely(!current_extra_caps.excaprefs[0] || !receiveBuffer)) {
     return info;
   }
 
-  destSlot =
+  destSlot = getR
 }
 
 void possible_switch_to(Tcb* tptr) {
