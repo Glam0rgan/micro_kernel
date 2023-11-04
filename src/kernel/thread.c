@@ -4,6 +4,7 @@
 #include "structures.h"
 #include "statedata.h"
 #include "util.h"
+#include "cap.h"
 
 // Get the Buffer from tcb sender anb receiver
 // next invoke do_normal_transfer if ok
@@ -21,7 +22,7 @@ void do_ipc_transfer(Tcb* sender, Endpoint* endpoint,
     do_normal_transfer(sender, sendBuffer, endpoint, badge,
       grant, receiver, receiveBuffer);
   } else {
-    do_fault_transfer();
+    do_fault_transfer(badge, sender, receiver, receiveBuffer);
   }
 }
 
@@ -62,9 +63,11 @@ void do_normal_transfer(Tcb* sender, u64* sendBuffer, Endpoint* endpoint,
 void do_fault_transfer(u64 badge, Tcb* sender, Tcb* reveiver,
   u64* reveiverIPCBuffer) {
 
-  u64 msgTransferred;
-  OsMessageInfo tag;
-  Exception status;
+  u64 sent;
+  OsMessageInfo msgInfo;
+
+  sent = setMRs_fault();
+  msgInfo;
 }
 
 void schedule_tcb(Tcb* tptr) {
@@ -77,7 +80,7 @@ void schedule_tcb(Tcb* tptr) {
 
 // Like getReceiveSlots, this is specialised for single-cap transfer.
 static OsMessageInfo transfer_caps(OsMessageInfo info,
-  Endpoint* endpoint, Tcb* receiver, u64* receiverBuffer) {
+  Endpoint* endpoint, Tcb* receiver, u64* receiveBuffer) {
   u64 i;
   Cte* destSlot;
 
@@ -89,7 +92,42 @@ static OsMessageInfo transfer_caps(OsMessageInfo info,
     return info;
   }
 
-  destSlot = getR
+  destSlot = get_receive_slots(receiver, receiveBuffer);
+
+  for(i = 0; i < os_MsgMaxExtraCpas && currentExtraCaps.excaprefs[i] != NULL; i++) {
+    Cte* slot = currentExtraCaps.excaprefs[i];
+    EndpointCap cap = *(EndpointCap*)(&slot->cap);
+
+
+    if(cap.capType == cap_endpoint_cap &&
+      EP_PTR(cap.capEPPtr) == endpoint) {
+      // If this is a cap to the endpoint on which the message was sent,
+      // only transfer the badge, not the cap.
+      set_extra_badge(receiveBuffer, (cap).capEPBadge, i);
+
+      info.capsUnwrapped = info.capsUnwrapped | (1 << i);
+    } else {
+      DeriveCapRet dcRet;
+
+      if(!destSlot) {
+        break;
+      }
+
+      if(dcRet.status != EXCEPTION_NONE) {
+        break;
+      }
+      if(dcRet.cap.capType != cap_null_cap) {
+        break;
+      }
+
+      cteInssert(dcRet.cap, slot, destSlot);
+
+      destSlot = NULL;
+    }
+  }
+
+  info.extraCaps = i;
+  return info;
 }
 
 void possible_switch_to(Tcb* tptr) {

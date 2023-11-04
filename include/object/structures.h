@@ -77,7 +77,7 @@ typedef struct _EndpointCap {
   u64 capCanSend : 1;
   u64 padding : 7;
   u64 capEPPtr : 48; // high
-} Endpoint;
+} EndpointCap;
 
 typedef struct _UntypedCap {
   u64 capFreeIndex : 48;

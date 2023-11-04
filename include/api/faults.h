@@ -1,0 +1,1 @@
+u64 setMRs_fault(Tcb* sender, Tcb* receiver, u64* receiveIPCBuffer);

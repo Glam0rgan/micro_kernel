@@ -106,3 +106,7 @@ cptr_t PURE get_extra_cptr(u64* bufferPtr, u64 i) {
   // caps_or_badges
   return (cptr_t)bufferPtr[os_MsgMaxLength + 2 + i];
 }
+
+void set_extra_badge(u64* bufferPtr, u64 badge, u64 i) {
+  bufferPtr[os_MsgMaxLength + 2 + i] = badge;
+}
