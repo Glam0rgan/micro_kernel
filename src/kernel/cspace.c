@@ -40,6 +40,55 @@ LookupSlotRawRet lookup_slot(tcb_t* thread, cptr_t capptr) {
   return ret;
 }
 
+// IsSource may mean whether gets the true slot ro a copy.
+LookupSlotRet lookup_slot_for_cnode_op(boot isSource, Cap root, cptr capptr, u64 depth) {
+  ResolveAddressBitsRet resRet;
+  LookupSlotRet ret;
+  ret.slot = NULL;
+
+  if(unlikely(root.capType != cap_cnode_cap)) {
+    currentSyscallError.type = os_FailedLookup;
+    currentSyscallError.failedLookupWasSource = isSource;
+    currentLookupFault.lufType = invalidRoot;
+    ret.status = EXCEPTION_SYSCALL_ERROR;
+    return ret;
+  }
+
+  if(unlikely(depth < 1 || depth > wordBits)) {
+    currentSyscallError.type = os_RangeError;
+    currentSyscallError.rangeErrorMin = 1;
+    currentSyscallError.rangeErrorMax = wordBits;
+    ret.status = EXCEPTION_SYSCALL_ERROR;
+    return ret;
+  }
+
+  resRet = resolve_address_bits(root, capptr, depth);
+  if(unlikely(resRet.status != EXCEPTION_NONE) {
+    currentSyscallError.type = os_FailedLookup;
+    currentSyscallError.failedLookupWasSource = isSource;
+    ret.status = EXCEPTION_SYSCALL_ERROR;
+    return ret;
+  }
+
+  if(unlikely(resRet.bitsRemaining != 0)) {
+    currentSyscallError.type = os_FailedLookup;
+    currentSyscallError.failedLookupWasSource = isSource;
+    // Need fix.
+      currentLookupFault.type = Lookup_fault_depth_mismatch;
+    currentLookupFault.bitsRemaning = resRet.bitsRemaining;
+    ret.status = EXCEPTION_SYSCALL_ERROR;
+    return ret;
+  }
+
+  ret.slot = resRet.slot;
+  ret.status = EXCEPTION_NONE;
+  return ret;
+}
+
+LookupSlotRet lookup_target_slot(Cap root, Cptr capptr, u64 depth) {
+  return lookup_slot_for_cnode_op(false, root, capptr, depth);
+}
+
 // Resolve address and get the status and slot 
 // n_bits is 1 << 6 in 64-bits.
 // go to the manual to see concrete process.
