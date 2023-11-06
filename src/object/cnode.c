@@ -39,7 +39,25 @@ static void set_untyped_cap_as_full() {
 
 }
 
-void cte_insert() {
+void cte_insert(Cap newCap, Cte* srcSlot, Cte* destSlot) {
+    MdbNode srcMDB, newMDB;
+    Cap srcCap;
+    bool newCapIsRevocable;
+
+    srcMDB = srcSlot->cteMDBNode;
+    srcCap = srcSlot->cap;
+
+    newCapIsRevocable = is_cap_revocable(newCap, srcCap);
+
+    newMDB;
+
+    // panic
+
+    set_untypedCap_as_full(srcCap, newCap, srcSlot);
+
+    destSlot->cap = newCap;
+    destSLot->cteMDBNode = newMDB;
+
 
 }
 // This implementation is specialised to the (current) limit

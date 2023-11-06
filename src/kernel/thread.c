@@ -56,7 +56,7 @@ void do_normal_transfer(Tcb* sender, u64* sendBuffer, Endpoint* endpoint,
 
   tag.length = msgTransferred;
 
-  setRegister(receiver, msgInfoRegister, u64_from_messageinfo(msgInfo));
+  setRegister(receiver, msgInfoRegister, u64_from_messageinfo(tag));
   setRegister(reveiver, badgeRegister, badge);
 }
 
@@ -94,7 +94,7 @@ static OsMessageInfo transfer_caps(OsMessageInfo info,
 
   destSlot = get_receive_slots(receiver, receiveBuffer);
 
-  for(i = 0; i < os_MsgMaxExtraCpas && currentExtraCaps.excaprefs[i] != NULL; i++) {
+  for(i = 0; i < os_MsgMaxExtraCaps && currentExtraCaps.excaprefs[i] != NULL; i++) {
     Cte* slot = currentExtraCaps.excaprefs[i];
     EndpointCap cap = *(EndpointCap*)(&slot->cap);
 
@@ -103,7 +103,7 @@ static OsMessageInfo transfer_caps(OsMessageInfo info,
       EP_PTR(cap.capEPPtr) == endpoint) {
       // If this is a cap to the endpoint on which the message was sent,
       // only transfer the badge, not the cap.
-      set_extra_badge(receiveBuffer, (cap).capEPBadge, i);
+      set_extra_badge(receiveBuffer, cap.capEPBadge, i);
 
       info.capsUnwrapped = info.capsUnwrapped | (1 << i);
     } else {
@@ -120,7 +120,7 @@ static OsMessageInfo transfer_caps(OsMessageInfo info,
         break;
       }
 
-      cteInssert(dcRet.cap, slot, destSlot);
+      cte_inssert(dcRet.cap, slot, destSlot);
 
       destSlot = NULL;
     }

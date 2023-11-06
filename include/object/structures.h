@@ -360,7 +360,7 @@ enum CapTag {
 // Capability table entry
 typedef struct _Cte {
   Cap cap;
-  MdbNode cteMBDNode;
+  MdbNode cteMDBNode;
 }Cte;
 
 static inline u64 CONST generic_frame_cap_get_capFIsDevice(cap_t cap) {

@@ -1,6 +1,9 @@
-#include "structures.h"
-#include "util.h"
-#include "tcb.h"
+#include <types.h>
+#include <failures.h>
+#include <structures.h>
+#include <util.h>
+#include <tcb.h>
+#include <arch/x86/arch/64/mode/machine/registerset.h>
 
 ExtraCaps currentExtraCaps;
 
@@ -50,7 +53,8 @@ u64 copyMRs(tcb_t* sender, u64* sendBuf, tcb_t* receiver,
 
   // Copy inline words (in registers)
   for(i = 0; i < n && i < n_msgRegisters; i++) {
-    setRegister();
+    setRegister(receiver, msgRegisters[i],
+      getRegister(sender, msgRegisters[i]));
   }
 
   // Don't have recvBuf or sendBuf, should return.  
