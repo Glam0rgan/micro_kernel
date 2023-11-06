@@ -47,7 +47,7 @@ Exception lookup_extra_caps(Tcb* thread, u64* bufferPtr, OsMessageInfo info) {
 }
 
 // Copy IPC MRs from one thread to another
-u64 copyMRs(tcb_t* sender, u64* sendBuf, tcb_t* receiver,
+u64 copyMRs(Tcb* sender, u64* sendBuf, Tcb* receiver,
   u64* recvBuf, u64 n) {
   u64 i;
 
@@ -70,12 +70,12 @@ u64 copyMRs(tcb_t* sender, u64* sendBuf, tcb_t* receiver,
   return i;
 }
 
-void setup_caller_cap(tcb_t* sender, tcb_t* receiver, bool_t canGrant) {
+void setup_caller_cap(Tcb* sender, Tcb* receiver, bool canGrant) {
 
 }
 
 // Add tcb to an endpoint queue
-tcb_queue_t tch_ep_append(tcb_t* tcb, tcb_queue_t queue) {
+TcbQueue tcb_ep_append(Tcb* tcb, TcbQueue queue) {
   if(!queue.head)
     queue.head = tcb;
   else
@@ -87,7 +87,7 @@ tcb_queue_t tch_ep_append(tcb_t* tcb, tcb_queue_t queue) {
 
 
 // Remove tcb from an endpoint queue
-tcb_queue_t tcb_ep_dequeue(tcb_t* tcb, tcb_queue_t queue) {
+TcbQueue tcb_ep_dequeue(Tcb* tcb, TcbQueue queue) {
   if(tcb->tcbEPPrev) {
     tcb->tcbEPPrev->tcbEPNext = tcb->tcbEPNext;
   } else {
@@ -104,13 +104,17 @@ tcb_queue_t tcb_ep_dequeue(tcb_t* tcb, tcb_queue_t queue) {
 }
 
 // Get the capability pointer position i in ipc_buffer
-cptr_t PURE get_extra_cptr(u64* bufferPtr, u64 i) {
+Cptr PURE get_extra_cptr(u64* bufferPtr, u64 i) {
   // The buffer structer
   // tag(8 bytes) msg(8* os_MsgMaxLength bytes ) user_data(8 byrtes)
   // caps_or_badges
-  return (cptr_t)bufferPtr[os_MsgMaxLength + 2 + i];
+  return (Cptr)bufferPtr[os_MsgMaxLength + 2 + i];
 }
 
 void set_extra_badge(u64* bufferPtr, u64 badge, u64 i) {
   bufferPtr[os_MsgMaxLength + 2 + i] = badge;
+}
+
+void setup_caller_cap(Tcb* sender) {
+
 }

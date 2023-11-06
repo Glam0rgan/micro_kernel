@@ -1,10 +1,10 @@
 #include <types.h>
 #include <ctypes.h>
-#include "thread.h"
-#include "structures.h"
-#include "statedata.h"
-#include "util.h"
-#include "cap.h"
+#include <thread.h>
+#include <structures.h>
+#include <statedata.h>
+#include <util.h>
+#include <cap.h>
 
 // Get the Buffer from tcb sender anb receiver
 // next invoke do_normal_transfer if ok
@@ -96,11 +96,11 @@ static OsMessageInfo transfer_caps(OsMessageInfo info,
 
   for(i = 0; i < os_MsgMaxExtraCaps && currentExtraCaps.excaprefs[i] != NULL; i++) {
     Cte* slot = currentExtraCaps.excaprefs[i];
-    EndpointCap cap = *(EndpointCap*)(&slot->cap);
+    Cap cap = slot->cap;
+    EndpointCap endpointCap = *(EndpointCap*)(&cap);
 
-
-    if(cap.capType == cap_endpoint_cap &&
-      EP_PTR(cap.capEPPtr) == endpoint) {
+    if(endpointCap.capType == cap_endpoint_cap &&
+      EP_PTR(endpointCap.capEPPtr) == endpoint) {
       // If this is a cap to the endpoint on which the message was sent,
       // only transfer the badge, not the cap.
       set_extra_badge(receiveBuffer, cap.capEPBadge, i);
@@ -131,5 +131,17 @@ static OsMessageInfo transfer_caps(OsMessageInfo info,
 }
 
 void possible_switch_to(Tcb* tptr) {
+  if(tptr == NODE_STATE(ksCurThread) &&
+    NODE_STATE(ksSchedulerAction) == SchedulerAction_ResumeCurrentThread &&
+    !is_runnable(tptr)) {
+    re_schedule_required();
+  }
+}
 
+void rescheduleRequired(void) {
+  if(NODE_STATE(ksSchedulerAction) != SchedulerAction_ResumeCurrentThread
+    && NODE_STATE(ksSchedulerAction) != SchedulerAction_ChooseNewThread) {
+    SCHED_ENQUEUE(NODE_STATE(ksSchedulerAction));
+  }
+  NODE_STATE(ksSchedulerAction) = SchedulerAction_ChooseNewThread;
 }

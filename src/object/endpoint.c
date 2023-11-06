@@ -7,14 +7,14 @@
 #include "thread.h"
 
 // Send ipc
-void send_ipc(bool_t blocking, bool_t do_call, u64 badge,
-  bool_t canGrant, bool_t canGrantReply,
-  tcb_t* thread, endpoint_t* epptr) {
-  switch(ep_ptr_get_state(epptr)) {
+void send_ipc(bool blocking, bool do_call, u64 badge,
+  bool canGrant, bool canGrantReply,
+  Tcb* thread, Endpoint* epptr) {
+  switch(epptr->state) {
   case EPState_Idle:
   case EPState_Send:
     if(blocking) {
-      tcb_queue_t queue;
+      TcbQueue queue;
 
       // Set thread state to BlockedOnSend
       (&thread->tcbState)->tsType = ThreadState_BlockedOnSend;
@@ -35,8 +35,8 @@ void send_ipc(bool_t blocking, bool_t do_call, u64 badge,
     break;
 
   case EPState_Recv:
-    tcb_queue_t queue;
-    tcb_t* dest;
+    TcbQueue queue;
+    Tcb* dest;
 
     // Get the head of the endpoint queue
     queue = epptr_get_queue(epptr);
@@ -56,33 +56,33 @@ void send_ipc(bool_t blocking, bool_t do_call, u64 badge,
     // Do the transfer
     do_ipc_transfer(thread, epptr, badge, canGrant, dest);
 
-    bool_t replyCanGrant = (&dest->tcbState)->blockingIPCCanGrant;
+    bool replyCanGrant = (&dest->tcbState)->blockingIPCCanGrant;
 
-    set_thread_state(dest, ThreadState_Running);
+    dest.threadState = ThreadState_Running;
     possible_switch_to(dest);
 
     if(do_call) {
       if(canGrant || canGrantReply) {
         setup_caller_cap(thread, dest, replyCanGrant);
       } else {
-        set_thread_state(thread, ThreadState_Inactive);
+        thread->threadState = ThreadState_Inactive;
       }
     }
     break;
   }
 }
 
-void receive_ipc(tcb_t* thread, cap_t cap, bool_t isBlocking) {
-  endpoint_t* epptr;
-  notification_t* ntfnPtr;
+void receive_ipc(Tcb* thread, Cap cap, bool isBlocking) {
+  Endpoint* epptr;
+  Notification* ntfnPtr;
 
   //if(unlikely(cap.capType != cap_endpoint_cap))
     //panic();
 
-  endpoint_cap_t* endpoint_cap_ptr = (endpoint_cap_t*)(&cap);
-  endpoint_cap_t endpoint_cap = *endpoint_cap_ptr;
+  EndpointCap* endpointCapPtr = (EndpointCap*)(&cap);
+  EndpointCap endpointCap = *endpointCapPtr;
 
-  epptr = EP_PTR(endpoint_cap.capEPPtr);
+  epptr = EP_PTR(endpointCap.capEPPtr);
 
   ntfnPtr = thread->tcbBoundNotification;
   if(ntfnPtr && ntfnPtr->state == NtfnState_Active) {
@@ -91,24 +91,23 @@ void receive_ipc(tcb_t* thread, cap_t cap, bool_t isBlocking) {
     switch(epptr->state) {
     case EPState_Idle:
     case EPState_Recv:
-      tcb_queue_t queue;
+      TcbQueue queue;
       if(isBlocking) {
         // Set thread state to BlockedOnReveive
 
       }
     case EPState_Send:
-      tcb_queue_t;
-      tcb_t* sender;
+      TcbQueue;
+      Tcb* sender;
       u64 badge;
-      bool_t canGrant;
-      bool_t canGrantReply;
-      bool_t do_call;
+      bool canGrant;
+      bool canGrantReply;
+      bool do_call;
 
       queue = epptr_get_queue(epptr);
       sender = queue.head;
 
-      // Haskell
-      // assert(sender);
+      // panic(sender);
 
       queue = tcb_ep_dequeue(sender, queue);
       epptr_set_queue(epptr, queue);
@@ -118,22 +117,23 @@ void receive_ipc(tcb_t* thread, cap_t cap, bool_t isBlocking) {
       }
 
       // Get sender IPC details
-      badge = thread_state_ptr_get_blockingIPCBadge(&sender->tcb_state);
-      canGrant = thread_state_ptr_get_blockingIPCCanGrant(&sender->tcb_state);
-      canGrantReply = thread_state_ptr_get_blockingIPCCanGrantReply(&sender->tcb_state);
+      badge = (&sender->tcb_state).blockingIPCBadge;
+      canGrant = (&sender->tcb_state).blockingIPCCanGrant;
+      canGrantReply = (&sender->tcb_state).blockingIPCCanGrantReply;
 
       do_ipc_transfer(sender, epptr, badge, canGrant, thread);
 
-      do_call = thread_state_ptr_get_blockingIPCIsCall(&sender->tcb_state);
+      do_call = (&sender->tcb_state).blockingIPCIsCall;
 
       if(do_call) {
         if(canGrant || canGrantReply) {
-
+          setup_caller_cap(sender, thread, endpointCap.canGrant);
         } else {
-
+          sender.threadState = ThreadState_Inactive;
         }
       } else {
-
+        sender.threadState = ThreadState_Running;
+        possible_switch_to(sender);
       }
       break;
     }
