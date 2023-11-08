@@ -1,18 +1,19 @@
 #include <types.h>
-#include <ctypes.h>
-#include <failures.h>
-#include <structures.h>
-#include <cspace.h>
-#include <util.h>
+#include <object.h>
+#include <api/failures.h>
+#include <kernel/thread.h>
+#include <kernel/cspace.h>
+#include <model/statedata.h>
+#include <arch/machine.h>
 
 // Invoke lookup_slot to get slot.
 // Return cap.
-LookupCapRet lookup_cap(Tcb* thread, Cptr cPtr) {
+LookupCapRet lookup_cap(Tcb* thread, CPtr cPtr) {
   LookupSlotRawRet luRet;
   LookupCapRet ret;
 
   luRet = lookup_slot(thread, cPtr);
-  if(unlikely(luRet.status != Exception_NONE)) {
+  if(unlikely(luRet.status != EXCEPTION_NONE)) {
     ret.status = luRet.status;
     ret.cap.capType = cap_null_cap;
     return ret;
@@ -22,9 +23,29 @@ LookupCapRet lookup_cap(Tcb* thread, Cptr cPtr) {
   ret.cap = luRet.slot->cap;
   return ret;
 }
+
+// Invoke lookup_slot to get slot.
+// Return cap and slot.
+LookupCapAndSlotRet lookup_cap_and_slot(Tcb* thread, CPtr cPtr) {
+  LookupSlotRawRet luRet;
+  LookupCapAndSlotRet ret;
+
+  luRet = lookup_slot(thread, cPtr);
+  if(unlikely(luRet.status != EXCEPTION_NONE)) {
+    ret.status = luRet.status;
+    ret.cap.capType = cap_null_cap;
+    return ret;
+  }
+
+  ret.status = EXCEPTION_NONE;
+  ret.cap = luRet.slot->cap;
+  ret.slot = luRet.slot;
+  return ret;
+}
+
 // Look-up slot by thread and capptr.
 // Return slot pointer.
-LookupSlotRawRet lookup_slot(tcb_t* thread, cptr_t capptr) {
+LookupSlotRawRet lookup_slot(Tcb* thread, CPtr capptr) {
   Cap threadRoot;
   ResolveAddressBitsRet resRet;
   LookupSlotRawRet ret;
@@ -41,7 +62,7 @@ LookupSlotRawRet lookup_slot(tcb_t* thread, cptr_t capptr) {
 }
 
 // IsSource may mean whether gets the true slot ro a copy.
-LookupSlotRet lookup_slot_for_cnode_op(boot isSource, Cap root, cptr capptr, u64 depth) {
+LookupSlotRet lookup_slot_for_cnode_op(bool isSource, Cap root, CPtr capptr, u64 depth) {
   ResolveAddressBitsRet resRet;
   LookupSlotRet ret;
   ret.slot = NULL;
@@ -63,7 +84,7 @@ LookupSlotRet lookup_slot_for_cnode_op(boot isSource, Cap root, cptr capptr, u64
   }
 
   resRet = resolve_address_bits(root, capptr, depth);
-  if(unlikely(resRet.status != EXCEPTION_NONE) {
+  if(unlikely(resRet.status != EXCEPTION_NONE)) {
     currentSyscallError.type = os_FailedLookup;
     currentSyscallError.failedLookupWasSource = isSource;
     ret.status = EXCEPTION_SYSCALL_ERROR;
@@ -74,7 +95,7 @@ LookupSlotRet lookup_slot_for_cnode_op(boot isSource, Cap root, cptr capptr, u64
     currentSyscallError.type = os_FailedLookup;
     currentSyscallError.failedLookupWasSource = isSource;
     // Need fix.
-      currentLookupFault.type = Lookup_fault_depth_mismatch;
+    currentLookupFault.type = Lookup_fault_depth_mismatch;
     currentLookupFault.bitsRemaning = resRet.bitsRemaining;
     ret.status = EXCEPTION_SYSCALL_ERROR;
     return ret;
@@ -85,69 +106,74 @@ LookupSlotRet lookup_slot_for_cnode_op(boot isSource, Cap root, cptr capptr, u64
   return ret;
 }
 
-LookupSlotRet lookup_target_slot(Cap root, Cptr capptr, u64 depth) {
+LookupSlotRet lookup_target_slot(Cap root, CPtr capptr, u64 depth) {
   return lookup_slot_for_cnode_op(false, root, capptr, depth);
 }
 
 // Resolve address and get the status and slot 
-// n_bits is 1 << 6 in 64-bits.
+// nBits is 1 << 6 in 64-bits.
 // go to the manual to see concrete process.
-ResolveAddressBitsRet resolve_address_bits(Cap node_cap, Cptr cap_ptr, u64 n_bits) {
+ResolveAddressBitsRet resolve_address_bits(Cap nodeCap, CPtr capPtr, u64 nBits) {
   ResolveAddressBitsRet ret;
-  u64 radix_bits, guard_bits, level_bits, guard;
-  u64 cap_guard, offset;
+  u64 radixBits, guardBits, levelBits, guard;
+  u64 capGuard, offset;
   Cte* slot;
 
-  ret.bits_remaining = n_bits;
+  ret.bitsRemaining = nBits;
   ret.slot = NULL;
 
-  if(unlikely(node_cap.capType != cap_cnode_cap)) {
+  if(unlikely(nodeCap.capType != cap_cnode_cap)) {
     // invalid_root_fault
     return ret;
   }
 
   // Cast to cnode_cap             
-  CNodeCap cnode_cap = (*(CNodeCap*)(&node_cap));
+  CNodeCap cnodeCap = (*(CNodeCap*)(&nodeCap));
 
   // resolve the address
   while(1) {
-    radix_bits = node_cap.capCNodeRadix;
-    guard_bits = node_cap.capCGuardSize;
-    level_bits = radix_bits + guard_bits;
+    radixBits = cnodeCap.capCNodeRadix;
+    guardBits = cnodeCap.capCNodeGuardSize;
+    levelBits = radixBits + guardBits;
 
-    // assert(level_bits != 0);
+    /*
+      if(levelBits!=0)
+        panic();
+    */
 
-    cap_guard = node_cap.capCnodeGuard;
-
-    guard = (cap_ptr >> ((n_bits - guard_bits) & MASK(wordRadix))) & MASK(guard_bits);
-
-    if(unlikely(guard_bits > n_bits || guard != cap_guard)) {
+    capGuard = cnodeCap.capCNodeGuard;
+    // The MASK(wordRadix) here is to avoid the case where
+    // nBits = wordBits (=2^wordRadix) and guardBits = 0, as it violates
+    // the C spec to shift right by more than wordBits-1.
+    guard = (capPtr >> ((nBits - guardBits) & MASK(wordRadix))) & MASK(guardBits);
+    if(unlikely(guardBits > nBits || guard != capGuard)) {
       // guard_mismatch
       return ret;
     }
 
-    if(unlikely(level_bits > n_bits)) {
+    if(unlikely(levelBits > nBits)) {
       // depth_mismatch
       return ret;
     }
 
-    offset = (cap_ptr >> (n_bits - level_bits)) & MASK(radix_bits);
-    slot = CTE_PTR(node_cap.capCNodePtr) + offset;
+    offset = (capPtr >> (nBits - levelBits)) & MASK(radixBits);
+    slot = CTE_PTR(cnodeCap.capCNodePtr) + offset;
 
-    if(likely(n_bits <= level_bits)) {
+    if(likely(nBits <= levelBits)) {
       ret.status = EXCEPTION_NONE;
       ret.slot = slot;
-      ret.bits_remaining = 0;
+      ret.bitsRemaining = 0;
       return ret;
     }
 
-    n_bits -= level_bits;
-    node_cap = slot->cap;
+    nBits -= levelBits;
+    nodeCap = slot->cap;
+    cnodeCap = (*(CNodeCap*)(&nodeCap));
 
-    if(unlikely(node_cap.capType != cap_cnode_cap)) {
+    if(unlikely(nodeCap.capType != cap_cnode_cap)) {
       ret.status = EXCEPTION_NONE;
       ret.slot = slot;
-      ret.bits_remaining = n_bits;
+      ret.bitsRemaining = nBits;
       return ret;
     }
   }
