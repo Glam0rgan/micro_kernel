@@ -1,9 +1,13 @@
+#pragma once
+
 #include <types.h>
 #include <ctypes.h>
+#include <os/os_arch/constants.h>
 #include <arch/object/structures.h>
 
 #define wordRadix 6
 #define CTE_PTR(r) ((Cte *)(r))
+#define CTE_REF(p) ((u64)(p))
 #define EP_PTR(r) ((Endpoint *)(r))
 
 // We would like the actual 'tcb' region (the portion that contains the tcb_t) of the tcb
@@ -296,7 +300,7 @@ struct _Tcb {
 
   Notification* tcbBoundNotification;
 
-  OsFault tcbFault;
+  OsFaultType tcbFault;
 
   LookupFault tcbLookupFailure;
 

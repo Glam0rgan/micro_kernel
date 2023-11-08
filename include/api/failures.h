@@ -1,3 +1,9 @@
+#pragma once
+
+#include <types.h>
+#include <os/errors.h>
+#include <os/constants.h>
+
 typedef u64 Exception;
 enum ExceptionType {
   EXCEPTION_NONE,

@@ -14,3 +14,13 @@ struct _FrameCap {
   u64 : 4;
 };
 typedef struct _FrameCap FrameCap;
+
+static inline bool CONST arch_is_cap_revocable(Cap derivedCap, Cap srcCap) {
+  switch(derivedCap.capType) {
+  case cap_io_port_cap:
+    return srcCap.capType == cap_io_port_control_cap;
+
+  default:
+    return false;
+  }
+}

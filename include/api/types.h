@@ -1,9 +1,23 @@
+#pragma once
+
+#include <util.h>
+#include <arch/types.h>
+
+
+static inline OsMessageInfo CONST messageinfo_from_u64_raw(u64 w) {
+  OsMessageInfo mi;
+
+  mi = (OsMessageInfo)w;
+  return mi;
+}
+
+
 static inline OsMessageInfo CONST messageinfo_from_u64(u64 w) {
   OsMessageInfo mi;
   u64 len;
 
   // Cast to OsMessageInfo
-  mi = (Os_MessageInfo)w;
+  mi = (OsMessageInfo)w;
 
   // Fix the length.
   len = mi.length;

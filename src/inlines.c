@@ -1,5 +1,6 @@
 #include<types.h>
-#include<failures.h>
+#include<api/failures.h>
+
 OsFault currentFault;
 LookupFault currentLookupFault;
 SyscallError currentSyscallError;

@@ -26,5 +26,6 @@
 
 #define CONST    __attribute__((__pure__))
 #define PURE     __attribute__((__pure__))
+#define NORETURN __attribute__((__noreturn__))
 
 #endif

@@ -1,3 +1,7 @@
+#pragma once
+
+#include <os/os_arch/constants.h>
+
 enum VmPageSize {
   X86_SmallPage,
   X86_LargePage,

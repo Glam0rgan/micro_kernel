@@ -1,4 +1,4 @@
-enum OsFault OsFaultType {
+enum OsFaultType {
   NullFault = 0,
   CapFault = 1,
   UnkownSyscall = 2,

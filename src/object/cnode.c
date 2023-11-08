@@ -49,7 +49,10 @@ void cte_insert(Cap newCap, Cte* srcSlot, Cte* destSlot) {
 
     newCapIsRevocable = is_cap_revocable(newCap, srcCap);
 
-    newMDB;
+    newMDB = srcMDB;
+    newMDB.mdbPrev = CTE_REF(srcSlot);
+    newMDB.mdbRevocable = newCapIsRevocable;
+    newMDB.mdbFirstBadged = newCapIsRevocable;
 
     // panic
 
@@ -57,8 +60,10 @@ void cte_insert(Cap newCap, Cte* srcSlot, Cte* destSlot) {
 
     destSlot->cap = newCap;
     destSLot->cteMDBNode = newMDB;
-
-
+    &srcSlot->cteMDBNode.mdbNext = CTE_REF(destSlot);
+    if(newMDB.mdbNext) {
+        &CTE_PTR(newMDB.mdbNext)->cteMDBNode, CTE_REF(destSlot);
+    }
 }
 // This implementation is specialised to the (current) limit
 // of one cap receive slot. 

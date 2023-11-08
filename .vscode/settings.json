@@ -18,6 +18,7 @@
     "files.associations": {
         "*.json": "jsonc",
         "stdbool.h": "c",
-        "util.h": "c"
+        "util.h": "c",
+        "cspace.h": "c"
     },
 }
