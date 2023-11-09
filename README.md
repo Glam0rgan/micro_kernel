@@ -1,13 +1,13 @@
 #  Micro-kernel implementation
-This is a micro-kernel implementation entirely depends on sel4.
+This is a micro-kernel implementation entirely depends on os.
 ## Reference
-- [seL4-resource-code](https://github.com/seL4/seL4/tree/12.1.0 "sel4")
-- [seL4-manual](https://sel4.systems/Info/Docs/seL4-manual-latest.pdf "sel4-manual")
+- [os-resource-code](https://github.com/os/os/tree/12.1.0 "os")
+- [os-manual](https://os.systems/Info/Docs/os-manual-latest.pdf "os-manual")
 
 ## TODOs
 - [X] fix structers with bitfield
-- [ ] implement the send_api and reveive api
-- [ ] implement the cspace
+- [X] implement the send_api and reveive api
+- [X] implement the cspace
 - [ ] implement the notification
 - [ ] implement the cnode
 - [ ] implement the interrupts
