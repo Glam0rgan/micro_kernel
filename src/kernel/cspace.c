@@ -110,6 +110,14 @@ LookupSlotRet lookup_target_slot(Cap root, CPtr capptr, u64 depth) {
   return lookup_slot_for_cnode_op(false, root, capptr, depth);
 }
 
+LookupSlotRet lookup_source_slot(Cap root, CPtr capptr, u64 depth) {
+  return lookup_slot_for_cnode_op(true, root, capptr, depth);
+}
+
+LookupSlotRet lookup_pivot_slot(Cap root, CPtr capptr, u64 depth) {
+  return lookup_slot_for_cnode_op(true, root, capptr, depth);
+}
+
 // Resolve address and get the status and slot 
 // nBits is 1 << 6 in 64-bits.
 // go to the manual to see concrete process.

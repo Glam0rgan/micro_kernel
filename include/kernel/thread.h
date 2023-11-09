@@ -1,9 +1,16 @@
+#pragma once
+#include <types.h>
+#include <util.h>
+#include <object/structures.h>
+#include <arch/machine.h>
 
 void schedule_tcb(Tcb* tptr);
 
 void set_thread_state(Tcb* tptr, _ThreadState ts);
 
 void possible_switch_to(Tcb* tptr);
+void reschedule_required(void);
+void schedule(void);
 
 void do_ipc_transfer(Tcb* sender, Endpoint endpoint,
     u64 badge, bool grant, Tcb* reveiver);
@@ -12,6 +19,8 @@ void do_normal_transfer(Tcb* sender, u64* sendBuffer, Endpoint* endpoint,
     u64* receiveBuffer);
 void do_fault_transfer(u64 badge, Tcb* sender, Tcb* reveiver,
     u64* reveiverIPCBuffer);
+
+void set_threadState(Tcb* tptr, _ThreadState ts);
 
 static inline bool PURE is_runnable(const Tcb* thread) {
     switch(thread->tcbState.tsType) {
@@ -22,3 +31,30 @@ static inline bool PURE is_runnable(const Tcb* thread) {
         return false;
     }
 }
+
+static inline bool PURE is_stopped(const Tcb* thread) {
+    switch(thread->tcbState.tsType) {
+    case ThreadState_Inactive:
+    case ThreadState_BlockedOnReceive:
+    case ThreadState_BlockedOnSend:
+    case ThreadState_BlockedOnNotification:
+    case ThreadState_BlockedOnReply:
+        return true;
+    default:
+        return false;
+    }
+}
+
+static inline bool PURE is_blocking(const Tcb* thread) {
+    switch(thread->tcbState.tsType) {
+    case ThreadState_BlockedOnReceive:
+    case ThreadState_BlockedOnSend:
+    case ThreadState_BlockedOnNotification:
+    case ThreadState_BlockedOnReply:
+        return true;
+    default:
+        return false;
+    }
+}
+
+#define isSchedulable isRunnable

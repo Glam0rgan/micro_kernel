@@ -1,10 +1,14 @@
 #include <types.h>
-#include <ctypes.h>
-#include "structures.h"
-#include "endpoint.h"
-#include "cnode.h"
-#include "tcb.h"
-#include "thread.h"
+#include <string.h>
+#include <os/constants.h>
+#include <kernel/thread.h>
+#include <kernel/vspace.h>
+#include <machine/registerset.h>
+#include <model/statedata.h>
+#include <object/notification.h>
+#include <object/cnode.h>
+#include <object/endpoint.h>
+#include <object/tcb.h>
 
 // Send ipc
 void send_ipc(bool blocking, bool do_call, u64 badge,

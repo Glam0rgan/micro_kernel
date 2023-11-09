@@ -1,3 +1,24 @@
+#include <config.h>
+#include <types.h>
+#include <api/failures.h>
+#include <api/syscall.h>
+#include <arch/object/objecttype.h>
+#include <machine/io.h>
+#include <object/objecttype.h>
+#include <object/structures.h>
+#include <object/notification.h>
+#include <object/endpoint.h>
+#include <object/cnode.h>
+#include <object/interrupt.h>
+#include <object/tcb.h>
+#include <object/untyped.h>
+#include <model/statedata.h>
+#include <kernel/thread.h>
+#include <kernel/vspace.h>
+#include <machine.h>
+#include <util.h>
+#include <string.h>
+
 bool CONST is_cap_revocable(Cap derivedCap, Cap srcCap) {
     if(is_arch_cap(derivedCap)) {
         return arch_is_cap_revocable(derivedCap, srcCap);

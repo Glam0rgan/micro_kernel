@@ -1,8 +1,10 @@
 #pragma once
 
+#include <stdint.h>
 #include <util.h>
+#include <arch/api/types.h>
 #include <arch/types.h>
-
+#include <os/constants.h>
 
 static inline OsMessageInfo CONST messageinfo_from_u64_raw(u64 w) {
   OsMessageInfo mi;

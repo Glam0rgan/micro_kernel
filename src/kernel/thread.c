@@ -1,10 +1,14 @@
-#include <types.h>
-#include <ctypes.h>
-#include <thread.h>
-#include <structures.h>
-#include <statedata.h>
+#include <api/types.h>
+#include <object.h>
+#include <api/faults.h>
 #include <util.h>
-#include <cap.h>
+#include <kernel/cspace.h>
+#include <kernel/thread.h>
+#include <kernel/vspace.h>
+#include <model/statedata.h>
+#include <arch/machine.h>
+#include <arch/kernel/thread.h>
+#include <machine/registerset.h>
 
 // Get the Buffer from tcb sender anb receiver
 // next invoke do_normal_transfer if ok
@@ -57,7 +61,7 @@ void do_normal_transfer(Tcb* sender, u64* sendBuffer, Endpoint* endpoint,
   tag.length = msgTransferred;
 
   setRegister(receiver, msgInfoRegister, u64_from_messageinfo(tag));
-  setRegister(reveiver, badgeRegister, badge);
+  setRegister(receiver, badgeRegister, badge);
 }
 
 void do_fault_transfer(u64 badge, Tcb* sender, Tcb* reveiver,
@@ -144,4 +148,9 @@ void rescheduleRequired(void) {
     SCHED_ENQUEUE(NODE_STATE(ksSchedulerAction));
   }
   NODE_STATE(ksSchedulerAction) = SchedulerAction_ChooseNewThread;
+}
+
+void set_threadState(Tcb* tptr, _ThreadState ts) {
+  &tptr->tcbState = ts;
+  schedule_tcb(tptr);
 }
