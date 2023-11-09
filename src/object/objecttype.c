@@ -19,6 +19,60 @@
 #include <util.h>
 #include <string.h>
 
+u64 CONST cap_get_cap_size_bits(Cap cap) {
+    CapTag cTag;
+
+    cTag = cap.capType;
+
+    switch(cTag) {
+    case cap_untyped_cap:
+        UntypedCap untypedCap = *(UntypedCap*)(&cap);
+        return untypedCap.capBlockSize;
+
+    case cap_endpoint_cap:
+        return os_EndpointBits;
+
+    case cap_notification_cap:
+        return os_NotificationBits;
+
+    case cap_cnode_cap:
+        CNodeCap cNodeCap = *(CNodeCap*)(&cap);
+        return cNodeCap.capCNodeRadix + os_SlotBits;
+
+    case cap_thread_cap:
+        return os_TCBBits;
+
+    case cap_zombie_cap: {
+        ZombieCap zombieCap = *(ZombieCap*)(&cap);
+        u64 type = zombieCap.capZombieType;
+        if(type == ZombieType_ZombieTCB) {
+            return os_TCBBits;
+        }
+        // need fix
+        return ZombieType_ZombieCNode(type) + os_SlotBits;
+    }
+
+    case cap_null_cap:
+        return 0;
+
+    case cap_domain_cap:
+        return 0;
+
+    case cap_reply_cap:
+        return 0;
+
+    case cap_irq_control_cap:
+        return 0;
+
+    case cap_irq_handler_cap:
+        return 0;
+
+    default:
+        // fix
+        return cap_get_archCapSizeBits(cap);
+    }
+}
+
 bool CONST is_cap_revocable(Cap derivedCap, Cap srcCap) {
     if(is_arch_cap(derivedCap)) {
         return arch_is_cap_revocable(derivedCap, srcCap);
