@@ -8,6 +8,15 @@
 
 #include <object/notification.h>
 
+static inline TcbQueue PURE ntfn_ptr_get_queue(Notification* ntfnPtr) {
+    TcbQueue ntfnQueue;
+
+    ntfnQueue.head = (Tcb*)ntfnPtr->ntfnQueueHead;
+    ntfnQueue.head = (Tcb*)ntfnPtr->ntfnQueueTail;
+
+    return ntfnQueue;
+}
+
 void complete_signal(Notification* ntfnPtr, Tcb* tcb) {
     u64 badge;
 
