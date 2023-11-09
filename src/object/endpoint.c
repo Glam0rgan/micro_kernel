@@ -83,14 +83,13 @@ void receive_ipc(Tcb* thread, Cap cap, bool isBlocking) {
   //if(unlikely(cap.capType != cap_endpoint_cap))
     //panic();
 
-  EndpointCap* endpointCapPtr = (EndpointCap*)(&cap);
-  EndpointCap endpointCap = *endpointCapPtr;
+  EndpointCap endpointCap = *(EndpointCap*)(&cap);
 
   epptr = EP_PTR(endpointCap.capEPPtr);
 
   ntfnPtr = thread->tcbBoundNotification;
   if(ntfnPtr && ntfnPtr->state == NtfnState_Active) {
-
+    complete_signal(ntfnPtr, thread);
   } else {
     switch(epptr->state) {
     case EPState_Idle:

@@ -19,6 +19,11 @@
         "*.json": "jsonc",
         "stdbool.h": "c",
         "util.h": "c",
-        "cspace.h": "c"
+        "cspace.h": "c",
+        "untyped.h": "c",
+        "tcb.h": "c",
+        "io.h": "c",
+        "notification.h": "c",
+        "statedata.h": "c"
     },
 }
