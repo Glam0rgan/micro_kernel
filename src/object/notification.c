@@ -17,6 +17,11 @@ static inline TcbQueue PURE ntfn_ptr_get_queue(Notification* ntfnPtr) {
     return ntfnQueue;
 }
 
+static inline void ntfn_ptr_set_queue(Notification* ntfnPtr, TcbQueue ntfnQueue) {
+    ntfnPtr->ntfnQueueHead = (u64)ntfnQueue.head;
+    ntfnPtr->ntfnQueueTail = (u64)ntfnQueue.Tail;
+}
+
 void complete_signal(Notification* ntfnPtr, Tcb* tcb) {
     u64 badge;
 
