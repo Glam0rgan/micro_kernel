@@ -1,7 +1,16 @@
-struct TcbQueue {
+#pragma once
+
+#include <types.h>
+#include <api/failures.h>
+#include <object/structures.h>
+
+#include <machine/registerset.h>
+#include <object/cnode.h>
+
+typedef struct _TcbQueue {
   Tcb* head;
   Tcb* end;
-};
+} TcbQueue;
 
 void setup_caller_cap(Tcb* sender, Tcb* receiver, bool canGrant);
 TcbQueue tch_ep_append(Tcb* tcb, TcbQueue queue);

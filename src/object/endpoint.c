@@ -11,7 +11,7 @@
 #include <object/tcb.h>
 
 // Send ipc
-void send_ipc(bool blocking, bool do_call, u64 badge,
+void send_ipc(bool blocking, bool doCall, u64 badge,
   bool canGrant, bool canGrantReply,
   Tcb* thread, Endpoint* epptr) {
   switch(epptr->state) {
@@ -62,14 +62,14 @@ void send_ipc(bool blocking, bool do_call, u64 badge,
 
     bool replyCanGrant = (&dest->tcbState)->blockingIPCCanGrant;
 
-    dest.threadState = ThreadState_Running;
+    set_thread_state(dest, ThreadState_Running);
     possible_switch_to(dest);
 
-    if(do_call) {
+    if(doCall) {
       if(canGrant || canGrantReply) {
         setup_caller_cap(thread, dest, replyCanGrant);
       } else {
-        thread->threadState = ThreadState_Inactive;
+        set_thread_state(thread, ThreadState_Running);
       }
     }
     break;
@@ -120,25 +120,59 @@ void receive_ipc(Tcb* thread, Cap cap, bool isBlocking) {
       }
 
       // Get sender IPC details
-      badge = (&sender->tcb_state).blockingIPCBadge;
-      canGrant = (&sender->tcb_state).blockingIPCCanGrant;
-      canGrantReply = (&sender->tcb_state).blockingIPCCanGrantReply;
+      badge = (&sender->tcbState).blockingIPCBadge;
+      canGrant = (&sender->tcbState).blockingIPCCanGrant;
+      canGrantReply = (&sender->tcbState).blockingIPCCanGrantReply;
 
       do_ipc_transfer(sender, epptr, badge, canGrant, thread);
 
-      do_call = (&sender->tcb_state).blockingIPCIsCall;
+      doCall = (&sender->tcbState).blockingIPCIsCall;
 
-      if(do_call) {
+      if(doCall) {
         if(canGrant || canGrantReply) {
           setup_caller_cap(sender, thread, endpointCap.canGrant);
         } else {
-          sender.threadState = ThreadState_Inactive;
+          set_thread_state(sender, ThreadState_Inactive);
         }
       } else {
-        sender.threadState = ThreadState_Running;
+        set_thread_state(sender, ThreadState_Running);
         possible_switch_to(sender);
       }
       break;
     }
+  }
+}
+
+void cancel_ipc(Tcb* tptr) {
+  ThreadState* state = &tptr->tcbState;
+
+  switch(state->tsType) {
+  case ThreadState_BlockedOnSend:
+  case ThreadState_BlockedOnReceive: {
+    // blockedIPCCancel state
+    Endpoint* epptr;
+    TcbQUeue queue;
+
+    epptr = EP_PTR(state->blockingObject);
+
+    // Error "blockedIPCCancel: endpoint must not be idle" 
+    // panic();
+
+    // Dequeue TCB.
+    queue = epptr_get_queue(epptr);
+    queue = tcb_ep_dequeue(tptr, queue);
+    epptr_set_queue(epptr, queue);
+
+    if(!queue.head) {
+      epptr->state = EPState_Idle;
+    }
+
+    set_thread_state(tptr, ThreadState_Inactive);
+    break;
+  }
+  case ThreadState_BlockedOnNotification:
+  case ThreadState_BlockedOnReply: {
+
+  }
   }
 }

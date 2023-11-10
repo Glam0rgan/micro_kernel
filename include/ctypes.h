@@ -1,3 +1,5 @@
+#pragma once
+
 #include <stdint.h> // define fixed-width integer
 #include <stdbool.h> // define boolean keywords: true, false, bool
 
