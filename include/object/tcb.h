@@ -11,8 +11,8 @@ void tcb_sched_enqueue(Tcb* tcb);
 
 #ifdef ENABLE_SMP_SUPPORT
 #define SCHED_ENQUEUE(_t) do {      \
-    tcbSchedEnqueue(_t);            \
-    remoteQueueUpdate(_t);          \
+    tcb_sched_enqueue(_t);            \
+    remote_queue_update(_t);          \
 } while (0)
 
 #else

@@ -144,10 +144,16 @@ void possible_switch_to(Tcb* target) {
   if(ksCurDomain != target->tcbDomain
     SMP_COND_STATEMENT(|| target->tcbAffinity != getCurrentCPUIndex())) {
     SCHED_ENQUEUE(target);
+  } else if(NODE_STATE(ksSchedulerAction) != SchedulerAction_resumeCurrentThread) {
+    // Too many threads want special treatment, use regular queues.
+    reschedule_required();
+    SCHED_ENQUEUE(target);
+  } else {
+    NODE_STATE(ksSchedulerAction) = target;
   }
 }
 
-void rescheduleRequired(void) {
+void reschedule_required(void) {
   if(NODE_STATE(ksSchedulerAction) != SchedulerAction_ResumeCurrentThread
     && NODE_STATE(ksSchedulerAction) != SchedulerAction_ChooseNewThread) {
     SCHED_ENQUEUE(NODE_STATE(ksSchedulerAction));
@@ -156,6 +162,6 @@ void rescheduleRequired(void) {
 }
 
 void set_threadState(Tcb* tptr, _ThreadState ts) {
-  &tptr->tcbState = ts;
+  tptr->tcbState.tsType = ts;
   schedule_tcb(tptr);
 }
