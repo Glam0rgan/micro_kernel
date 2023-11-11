@@ -115,6 +115,102 @@ void set_extra_badge(u64* bufferPtr, u64 badge, u64 i) {
   bufferPtr[os_MsgMaxLength + 2 + i] = badge;
 }
 
-void setup_caller_cap(Tcb* sender) {
+// Add TCB to the head of a scheduler queue.
+void tcb_sched_enqueue(Tcb* tcb) {
+  if(!tcb->tcbState.tcbQueued) {
+    TcbQueue queue;
+    Dom dom;
+    Prio prio;
+    u64 idx;
 
+    dom = tcb->tcbDomain;
+    prio = tcb->tcbPriority;
+    idx = ready_queues_index(dom, prio);
+    queue = NODE_STATE_ON_CORE(ksReadyQueues[idx], tcb->tcbAffinity);
+
+    if(!queue.head) { // Empty List
+      queue.end = tcb;
+      // fix
+      // add_to_bitmap();
+    } else {
+      queue.head->tcbSchedPrev = tcb;
+    }
+    tcb->tcbSchedPrev = NULL;
+    tcb->tcbSchedNext = queue.head;
+    queue.head = tcb;
+
+    NODE_STATE_ON_CORE(ksReadyQueues[idx], tcb->tcbAffinity) = queue;
+
+    &tcb->tcbState.tcbQueued = true;
+  }
+}
+
+// Add TCB to the end of a scheduler queue.
+void tcb_sched_append(Tcb* tcb) {
+  if(!tcb->tcbState.tcbQueued) {
+    TcbQueue queue;
+    Dom dom;
+    Prio prio;
+    u64 idx;
+
+    dom = tcb->tcbDomain;
+    prio = tcb->tcbPriority;
+    idx = ready_queues_index(dom, prio);
+    queue = NODE_STATE_ON_CORE(ksReadyQueues[idx], tcb->tcbAffinity);
+
+    if(!queue.head) { // Empty List
+      queue.head = tcb;
+      // fix
+      // add_to_bitmap();
+    } else {
+      queue.end->tcbSchedPrev = tcb;
+    }
+    tcb->tcbSchedPrev = queue.end;
+    tcb->tcbSchedNext = NULL;
+    queue.end = tcb;
+
+    NODE_STATE_ON_CORE(ksReadyQueues[idx], tcb->tcbAffinity) = queue;
+
+    &tcb->tcbState.tcbQueued = true;
+  }
+}
+
+// Remove TCB from a scheduler queue.
+void tcb_sched_dequeue(Tcb* tcb) {
+  if(tcb->tcbState.tcbQueued) {
+    TcbQueue queue;
+    Dom dom;
+    Prio prio;
+    u64 idx;
+
+    dom = tcb->tcbDomain;
+    prio = tcb->tcbPriority;
+    idx = ready_queues_index(dom, prio);
+    queue = NODE_STATE_ON_CORE(ksReadyQueues[idx], tcb->tcbAffinity);
+
+    if(tcb->tcbSchedPrev) {
+      tcb->tcbSchedPrev->tcbSchedNext = tcb->tcbSchedNext;
+    } else {
+      queue.head = tcb->tcbSchedNext;
+      if(likely(!tcb->tcbSchedNext)) {
+        // fix
+        // remove_from_bitmap
+      }
+    }
+
+
+    if(tcb->tcbSchedNext) {
+      tcb->tcbSchedNext->tcbSchedPrev = tcb->tcbSchedPrev;
+    } else {
+      queue.end = tcb->tcbSchedPrev;
+      if(likely(!tcb->tcbSchedPrev)) {
+        // fix
+        // remove_from_bitmap
+      }
+    }
+
+    NODE_STATE_ON_CORE(ksReadyQueues[idx], tcb->tcbAffinity) = queue;
+
+    &tcb->tcbState.tcbQueued = false;
+  }
 }

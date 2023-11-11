@@ -36,6 +36,13 @@ void send_signal(Notification* ntfnPtr, u64 badge) {
                 possible_switch_to(tcb);
             }
         } else {
+            /* In particular, this path is taken when a thread
+            is waiting on a reply cap since BlockedOnReply
+            would also trigger this path. I.e, a thread
+            with a bound notification will not be awakened
+            by signals on that bound notification if it is
+            in the middle of an seL4_Call.
+            */
             ntfn_set_active(ntfnPtr, badge);
         }
     }
@@ -75,6 +82,7 @@ void cancel_allSignal(Notification* ntfnPtr) {
         // Set all waiting threads to Restart.
         for(;thread;thread = thread->tcbEPNext) {
             set_thread_state(thread, ThreadState_Restart);
+            // Add thread to scheduler queue.
             SCHED_ENQUEUE(thread);
         }
         reschedule_required();

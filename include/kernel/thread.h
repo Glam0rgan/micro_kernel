@@ -4,6 +4,16 @@
 #include <object/structures.h>
 #include <arch/machine.h>
 
+static inline CONST u64 ready_queues_index(u64 dom, u64 prio) {
+    if(numDomains > 1) {
+        return dom * CONFIG_NUM_PRIORITIES + prio;
+    } else {
+        // if(dom == 0)
+        //   panic();
+        return prio;
+    }
+}
+
 void schedule_tcb(Tcb* tptr);
 
 void set_thread_state(Tcb* tptr, _ThreadState ts);

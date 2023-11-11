@@ -134,11 +134,16 @@ static OsMessageInfo transfer_caps(OsMessageInfo info,
   return info;
 }
 
-void possible_switch_to(Tcb* tptr) {
-  if(tptr == NODE_STATE(ksCurThread) &&
-    NODE_STATE(ksSchedulerAction) == SchedulerAction_ResumeCurrentThread &&
-    !is_runnable(tptr)) {
-    re_schedule_required();
+/*
+Note that this thread will possibly continue at the end of this kernel
+entry. Do not queue it yet, since a queue+unqueue operation is wasteful
+if it will be picked. Instead, it waits in the 'ksSchedulerAction' site
+on which the scheduler will take action.
+*/
+void possible_switch_to(Tcb* target) {
+  if(ksCurDomain != target->tcbDomain
+    SMP_COND_STATEMENT(|| target->tcbAffinity != getCurrentCPUIndex())) {
+    SCHED_ENQUEUE(target);
   }
 }
 

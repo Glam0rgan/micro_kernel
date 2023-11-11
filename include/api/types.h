@@ -6,6 +6,8 @@
 #include <arch/types.h>
 #include <os/constants.h>
 
+typedef u64 Prio;
+
 static inline OsMessageInfo CONST messageinfo_from_u64_raw(u64 w) {
   OsMessageInfo mi;
 

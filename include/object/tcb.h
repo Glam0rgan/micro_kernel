@@ -7,6 +7,18 @@
 #include <machine/registerset.h>
 #include <object/cnode.h>
 
+void tcb_sched_enqueue(Tcb* tcb);
+
+#ifdef ENABLE_SMP_SUPPORT
+#define SCHED_ENQUEUE(_t) do {      \
+    tcbSchedEnqueue(_t);            \
+    remoteQueueUpdate(_t);          \
+} while (0)
+
+#else
+#define SCHED_ENQUEUE(_t)           tcb_sched_enqueue(_t)
+#endif
+
 typedef struct _TcbQueue {
   Tcb* head;
   Tcb* end;
