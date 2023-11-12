@@ -67,18 +67,15 @@ void do_normal_transfer(Tcb* sender, u64* sendBuffer, Endpoint* endpoint,
 void do_fault_transfer(u64 badge, Tcb* sender, Tcb* reveiver,
   u64* reveiverIPCBuffer) {
 
-  u64 sent;
-  OsMessageInfo msgInfo;
-
-  sent = setMRs_fault();
-  msgInfo;
 }
 
+// Resume the current thread and invoke reschedule_required
+// to add ksSchedulerAction to the scheduler queue
 void schedule_tcb(Tcb* tptr) {
   if(tptr == NODE_STATE(ksCurThread) &&
     NODE_STATE(ksSchedulerAction) == SchedulerAction_ResumCurrentThread &&
     !isSchedulable(tptr)) {
-    rescheduleRequired();
+    reschedule_required();
   }
 }
 
@@ -132,6 +129,45 @@ static OsMessageInfo transfer_caps(OsMessageInfo info,
 
   info.extraCaps = i;
   return info;
+}
+
+void do_nbRecvFailed_transfer(Tcb* thread) {
+  /* Set the badge register to 0 to indicate there was no message */
+  set_register(thread, badgeRegister, 0);
+}
+
+void switch_to_thread(Tcb* thread) {
+  arch_switch_to_thread(thread);
+  tcb_sched_dequeue(thread);
+  NODE_STATE(ksCurThread) = thread;
+}
+
+static void schedule_choose_newThread(void) {
+  choose_thread();
+}
+
+void schedule(void) {
+  if(ksSchedulerAction != SchedulerAction_ResumeCurrentThread) {
+    bool wasRunnable;
+    if(is_runnable(ksCurThread)) {
+      wasRunnable = true;
+      tcb_sched_enqueue(ksCurThread);
+    } else {
+      wasRunnable = false;
+    }
+
+    if(ksSchedulerAction == SchedulerAction_ChooseNewThread) {
+      schedule_choose_newThread();
+    } else {
+      schedule_choose_newThread();
+    }
+  }
+  ksSchedulerAction = SchedulerAction_ResumeCurrentThread;
+}
+
+void choose_thread(void) {
+  thread = ksReadyQueue.head;
+  switch_to_thread(thread);
 }
 
 /*

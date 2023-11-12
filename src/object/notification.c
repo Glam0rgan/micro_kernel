@@ -43,20 +43,79 @@ void send_signal(Notification* ntfnPtr, u64 badge) {
             by signals on that bound notification if it is
             in the middle of an seL4_Call.
             */
+            // ???????
             ntfn_set_active(ntfnPtr, badge);
         }
     }
     case NtfnState_Waiting: {
+        TcbQueue nftnQueue;
+        Tcb* dest;
 
+        ntfnQueue = ntfn_ptr_get_queue(ntfnPtr);
+        dest = ntfnQueue.head;
+
+        // if(dest == 0)
+        // panic();
+
+        // Dequeue TCB.
+        ntfnQueue = tcb_ep_dequeue(dest, ntfnQueue);
+        ntfn_ptr_set_queue(ntfnPte, ntfnQueue);
+
+        // Set he thread state to idle if the queue is empty.
+        if(!ntfnQueue.head) {
+            ntfnPtr->state = NtfnState_Idle;
+        }
+
+        set_thread_state(dest, ThreadState_Running);
+        set_register(dest, badgeRegister, badge);
+        possible_switch_to(dest);
+        break;
     }
     case NtfnState_Active: {
+        u64 badge2;
 
+        badge2 = ntfnPtr->ntfnMsgIdentifier;
+        badge2 |= badge;
+
+        ntfnPtr->ntfnMsgIdentifier = badge2;
+        break;
     }
     }
 }
 
 void receive_signal(Tcb* thread, Cap cap, bool isBlocking) {
+    Notification* ntfnPtr;
 
+    NotificationCap notifactionCap = *(NotificationCap*)(&cap);
+    ntfnPtr = NTFN_PTR(notificationCap);
+
+    switch(ntfnPtr->state) {
+    case NtfnState_Idle:
+    case NtfnState_Waiting: {
+        TcbQueue ntfnQueue;
+
+        if(isBlocking) {
+            // Block thread on notification object.
+            &thread->tcbState.tsType = ThreadState_BlockedOnNotification;
+            &thread->tcbState.blockingObject = NTFN_REF(ntfnPtr);
+            schedule_tcb(thread);
+
+            // Enqueue TCB.
+            ntfnQueue = ntfn_ptr_get_queue(ntfnPtr);
+            ntfnQueue = tcb_ep_append(thread, ntfnQueue);
+
+            ntfnPtr.state = NtfnState_Waiting;
+            ntfn_ptr_set_queue(ntfnQueue);
+        } else {
+            do_nbrecv_failed_transfer(thread);
+        }
+        break;
+    }
+    case NtfnState_Active:
+        set_register(thread, badgeRegister,
+            ntfnPtr->ntfnMsgIdentifier);
+        break;
+    }
 }
 
 void complete_signal(Notification* ntfnPtr, Tcb* tcb) {
@@ -71,7 +130,7 @@ void complete_signal(Notification* ntfnPtr, Tcb* tcb) {
     }
 }
 
-void cancel_allSignal(Notification* ntfnPtr) {
+void cancel_allSignals(Notification* ntfnPtr) {
     if(ntfnPtr->state == NtfnState_Waiting) {
         Tcb* thread = TCB_PTR(ntfnPtr->ntfnQueueHead);
 

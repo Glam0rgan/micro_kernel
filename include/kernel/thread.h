@@ -31,6 +31,7 @@ void do_fault_transfer(u64 badge, Tcb* sender, Tcb* reveiver,
     u64* reveiverIPCBuffer);
 
 void set_threadState(Tcb* tptr, _ThreadState ts);
+void choose_thread(void);
 
 static inline bool PURE is_runnable(const Tcb* thread) {
     switch(thread->tcbState.tsType) {
