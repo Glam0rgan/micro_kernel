@@ -101,7 +101,7 @@ typedef struct _NotificationCap {
   u64 capNtfnCanSend : 1;
   u64 : 9;
   u64 capNtfnPtr : 48; // high
-}Notification;
+}NotificationCap;
 
 typedef struct _ReplyCap {
   u64 caoTCBPtr;
@@ -128,7 +128,7 @@ typedef struct _ThreadCap {
   u64 : 11;
   u64 capTCBPtr : 48; // high
 
-}ThreaddCap;
+}ThreadCap;
 
 typedef struct _IrqControlCap {
   u64 padding;

@@ -8,3 +8,6 @@
 #else
 #define os_TCBBits         11
 #endif
+
+#define os_EndpointBits 4
+#define os_NotificationBits 5

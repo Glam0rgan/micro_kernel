@@ -1,43 +1,14 @@
 #include <types.h>
-#include <ctypes.h>
-#include "cnode.h"
-#include "failures.h"
-
-exception_t decode_cnode_invocation() {
-
-}
-
-exception_t invoke_cnode_revoke() {
-
-}
-
-exception_t invoke_cnode_delete() {
-
-}
-
-exception_t invoke_cnode_cancel_badged_sends() {
-
-}
-
-exception_t invoke_cnode_insert() {
-
-}
-
-exception_t invoke_cnode_move() {
-
-}
-
-exception_t invoke_cnode_rorate() {
-
-}
-
-exception_t invoke_cnode_save_caller() {
-
-}
-
-static void set_untyped_cap_as_full() {
-
-}
+#include <api/failures.h>
+#include <api/types.h>
+#include <object/structures.h>
+#include <object/objecttype.h>
+#include <object/cnode.h>
+#include <object/interrupt.h>
+#include <object/untyped.h>
+#include <kernel/cspace.h>
+#include <kernel/thread.h>
+#include <util.h>
 
 void cte_insert(Cap newCap, Cte* srcSlot, Cte* destSlot) {
     MdbNode srcMDB, newMDB;
@@ -106,4 +77,20 @@ Cte* get_receive_slots(Tcb* thread, u64* buffer) {
 Cap_Tranfer PURE load_cap_transfer(u64* buffer) {
     const int offset = os_MsgMaxLength + os_MsgMaxExtraCaps + 2;
     return capTransfer_from_u64(buffer + offset);
+}
+
+void insert_new_cap(Cte* parent, Cte* slot, Cap cap) {
+    Cte* next;
+
+    next = CTE_PTR(parent->cteMDBNode.mdbNext);
+    slot->cap = cap;
+    slot->cteMDBNode.mdbNext = CTE_REF(next);
+    slot->cteMDBNode.mdbRevocable = true;
+    slot->cteMDBNode.mdbFirstBadge = true;
+    slot->cteMDBNode.mdbPrev = CTE_REF(parent);
+
+    if(next) {
+        &next->cteMDBNode = CTE_REF(slot);
+    }
+    &parent->cteMDNNode = CTE_REF(slot);
 }

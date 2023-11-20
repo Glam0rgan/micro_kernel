@@ -19,6 +19,111 @@
 #include <util.h>
 #include <string.h>
 
+u64 get_object_size(u64 objectType, u64 userObjectSize) {
+    // arch_get_object_size
+
+    switch(objectType) {
+    case osTCBObject:
+        return os_TCBBits;
+    case osEndpointObject:
+        return os_EndpointBits;
+    case osNotificationObject:
+        return os_NotificationBits;
+    case osCapTableObject:
+        return os_SlotBits + userObjectSize;
+    case osUntypedObject:
+        return userObjectSize;
+    default:
+        panic("invalid object type");
+        return 0;
+    }
+}
+
+Cap create_object(u64 objectType, void* regionBase, u64 userSize, bool deviceMemory) {
+    // wait to implement the function arch_create_object
+    /*
+    // Handle architecture-specific objects.
+    if(t >= (u64)osNonArchObjectTypeCount) {
+        return arch_create_object(objectType, regionBase, userSize, deviceMemory);
+    }
+    */
+    switch(objectType) {
+    case osTCBObject: {
+        Tcb* tcb;
+        tcb = TCB_PTR((u64)regionBase + TCB_OFFSET);
+
+        tcb->tcbTimeSlice = CONFIG_TIME_SLICE;
+        // tcbDomain
+        ThreadCap threadCap;
+        threadCap.capType = cap_thread_cap;
+        threadCap.capTCBPtr = TCB_REF(tcb);
+    }
+    case osEndpointObject: {
+        EndpointCap endpointCap;
+        endpointCap.capCanGrant = 1;
+        endpointCap.capCanGrantReply = 1;
+        endpointCap.capCanReceive = 1;
+        endpointCap.capCanSend = 1;
+        endpointCap.capEPPtr = EP_REF(regionBase);
+        endpointCap.capType = cap_endpoint_cap;
+        Cap cap = *(Cap*)(&endpointCap);
+        return cap;
+    }
+    case osNotificationObject: {
+        NotificationCap notificationCap;
+        notificationCap.capNtfnCanReceive = 1;
+        notificationCap.capNtfnCanSend = 1;
+        notificationCap.capType = cap_notification_cap;
+        notificationCap.capNtfnPtr = NTFN_REF(regionBase);
+        Cap cap = *(Cap*)(&notificationCap);
+        return cap;
+    }
+    case osCapTableObject: {
+        CNodeCap cnodeCap;
+        cnodeCap.capCNodeGuard = userSize;
+        cnodeCap.capCNodeGuardSize = 0;
+        cnodeCap.capCNodeRadix = 0;
+        cnodeCap.capCNodePtr = CTE_REF(regionBase);
+        Cap cap = *(Cap*)(&cnodeCap);
+        return cap;
+    }
+    case osUntypedObject: {
+        UntypedCap untypedCap;
+        untypedCap.capFreeIndex = 0;
+        untypedCap.capIsDevice = !!deviceMemory;
+        untypedCap.capBlockSize = userSize;
+        untypedCap.capPtr = (u64)regionBase;
+        untypedCap.capType = cap_untyped_cap;
+        Cap cap = *(Cap*)(&untypedCap);
+        return cap;
+    }
+    default: {
+        panic("createobjectdefault");
+    }
+    }
+}
+
+void create_new_object(u64 objectType, Cte* parent,
+    Cte* destCNode, u64 destOffset, u64 destLength,
+    void* regionBase, u64 userSize, bool deviceMemory) {
+    u64 objectSize;
+    void* nextFreeArea;
+    u64 i;
+    u64 totalObjectSize UNUSED;
+
+    objectSize = get_object_size(objectType, userSize);
+    totalObjectSize = destLength << objectSize;
+
+    nextFreeArea = regionBase;
+    for(i = 0;i < destLength;i++) {
+        //Create the object.
+        Cap cap = create_object(objectType, (void*)((u64)nextFreeArea + (i << objectSize)), userSize, deviceMemory);
+
+        // Insert the cap into the user's cspace.
+        insert_new_cap(parent, &destCNode[destOffset + i], cap);
+    }
+}
+
 u64 CONST cap_get_cap_size_bits(Cap cap) {
     CapTag cTag;
 
