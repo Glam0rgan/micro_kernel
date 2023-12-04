@@ -1,6 +1,6 @@
 #include <types.h>
 #include <ctypes.h>
-#include "untyped.h"
+#include <untyped.h>
 
 // Choose some capability in untyped element to create a new CNode.
 Exception invoke_untyped_retype(Cte* srcSlot, bool reset,
@@ -28,6 +28,7 @@ Exception invoke_untyped_retype(Cte* srcSlot, bool reset,
     freeRef = (u64)retypeBase + totalObjectSize;
 
     untypedCap.capFreeIndex = GET_FREE_INDEX(regionBase, freeRef);
+    srcSlot->cap = *(Cap*)(&untypedCap);
 
     // Create new objects and caps.
     create_new_objects(newType, srcSlot, destCNode, destOffset, destLength,

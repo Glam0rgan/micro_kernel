@@ -187,7 +187,7 @@ typedef struct _MdbNode {
   u64 mdbNext : 46; // high
   u64 mdbRevocable : 1;
   u64 mdbFirstBadged : 1;
-  u64 mdbprev;
+  u64 mdbPrev;
 }MdbNode;
 
 // Lookup fault: size = 16 bytes

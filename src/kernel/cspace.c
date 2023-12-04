@@ -61,7 +61,7 @@ LookupSlotRawRet lookup_slot(Tcb* thread, CPtr capptr) {
   return ret;
 }
 
-// IsSource may mean whether gets the true slot ro a copy.
+// IsSource may mean whether gets the true slot or a copy.
 LookupSlotRet lookup_slot_for_cnode_op(bool isSource, Cap root, CPtr capptr, u64 depth) {
   ResolveAddressBitsRet resRet;
   LookupSlotRet ret;
@@ -139,51 +139,37 @@ ResolveAddressBitsRet resolve_address_bits(Cap nodeCap, CPtr capPtr, u64 nBits) 
   CNodeCap cnodeCap = (*(CNodeCap*)(&nodeCap));
 
   // resolve the address
-  while(1) {
-    radixBits = cnodeCap.capCNodeRadix;
-    guardBits = cnodeCap.capCNodeGuardSize;
-    levelBits = radixBits + guardBits;
+  radixBits = cnodeCap.capCNodeRadix;
+  guardBits = cnodeCap.capCNodeGuardSize;
+  levelBits = radixBits + guardBits;
 
-    /*
-      if(levelBits!=0)
-        panic();
-    */
+  // The MASK(wordRadix) here is to avoid the case where
+  // nBits = wordBits (=2^wordRadix) and guardBits = 0, as it violates
+  // the C spec to shift right by more than wordBits-1.
 
-    capGuard = cnodeCap.capCNodeGuard;
-    // The MASK(wordRadix) here is to avoid the case where
-    // nBits = wordBits (=2^wordRadix) and guardBits = 0, as it violates
-    // the C spec to shift right by more than wordBits-1.
-    guard = (capPtr >> ((nBits - guardBits) & MASK(wordRadix))) & MASK(guardBits);
-    if(unlikely(guardBits > nBits || guard != capGuard)) {
-      // guard_mismatch
-      return ret;
-    }
+  if(unlikely(levelBits > nBits)) {
+    // depth_mismatch
+    return ret;
+  }
 
-    if(unlikely(levelBits > nBits)) {
-      // depth_mismatch
-      return ret;
-    }
+  offset = capPtr;
+  slot = CTE_PTR(cnodeCap.capCNodePtr << 1) + offset;
 
-    offset = (capPtr >> (nBits - levelBits)) & MASK(radixBits);
-    slot = CTE_PTR(cnodeCap.capCNodePtr) + offset;
+  if(likely(levelBits == 0)) {
+    ret.status = EXCEPTION_NONE;
+    ret.slot = slot;
+    ret.bitsRemaining = 0;
+    return ret;
+  }
 
-    if(likely(nBits <= levelBits)) {
-      ret.status = EXCEPTION_NONE;
-      ret.slot = slot;
-      ret.bitsRemaining = 0;
-      return ret;
-    }
+  nodeCap = slot->cap;
+  cnodeCap = (*(CNodeCap*)(&nodeCap));
 
-    nBits -= levelBits;
-    nodeCap = slot->cap;
-    cnodeCap = (*(CNodeCap*)(&nodeCap));
-
-    if(unlikely(nodeCap.capType != cap_cnode_cap)) {
-      ret.status = EXCEPTION_NONE;
-      ret.slot = slot;
-      ret.bitsRemaining = nBits;
-      return ret;
-    }
+  if(unlikely(nodeCap.capType != cap_cnode_cap)) {
+    ret.status = EXCEPTION_NONE;
+    ret.slot = slot;
+    ret.bitsRemaining = nBits;
+    return ret;
   }
 
   ret.status = EXCEPTION_NONE;

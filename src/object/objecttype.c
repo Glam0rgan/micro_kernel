@@ -109,10 +109,8 @@ void create_new_object(u64 objectType, Cte* parent,
     u64 objectSize;
     void* nextFreeArea;
     u64 i;
-    u64 totalObjectSize UNUSED;
 
     objectSize = get_object_size(objectType, userSize);
-    totalObjectSize = destLength << objectSize;
 
     nextFreeArea = regionBase;
     for(i = 0;i < destLength;i++) {

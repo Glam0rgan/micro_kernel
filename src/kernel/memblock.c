@@ -24,12 +24,12 @@ void memblock_insert_region(struct memblock_type* type, int idx, u64 base, u64 s
 void memblock_merge_regions(struct memblock_type* type) {
   int i = 0;
 
-  while (i < type->cnt - 1) {
+  while(i < type->cnt - 1) {
 
     struct memblock_region* this = &type->regions[i];
     struct memblock_region* next = &type->regions[i + 1];
 
-    if (this->base + this->size != next->base) {
+    if(this->base + this->size != next->base) {
       i++;
       continue;
     }
@@ -48,7 +48,7 @@ void memblock_remove_region(struct memblock_type* type, u64 i) {
     (type->cnt - (i + 1)) * sizeof(type->regions[i]));
   type->cnt--;
 
-  if (type->cnt == 0) {
+  if(type->cnt == 0) {
     type->cnt = 1;
     type->regions[0].base = 0;
     type->regions[0].size = 0;
@@ -63,9 +63,9 @@ int memblock_add_regions(struct memblock_type* type, u64 base, u64 size) {
   int idx, nr_new;
   struct memblock_region* rgn;
 
-  if (!size)return 0;
+  if(!size)return 0;
 
-  if (type->regions[0].size == 0) {
+  if(type->regions[0].size == 0) {
     type->regions[0].base = base;
     type->regions[0].size = size;
     type->total_size = size;
@@ -78,33 +78,32 @@ repeat:
     u64 rbase = rgn->base;
     u64 rend = rbase + rgn->size;
 
-    if (rbase >= end)
+    if(rbase >= end)
       break;
-    if (rend <= base)
+    if(rend <= base)
       continue;
-    if (rbase > base) {
+    if(rbase > base) {
       nr_new++;
-      if (insert)
+      if(insert)
         memblock_insert_region(type, idx++, base, rbase - base);
     }
     base = min(rend, end);
   }
-  if (base < end) {
+  if(base < end) {
     nr_new++;
-    if (insert)
+    if(insert)
       memblock_insert_region(type, idx, base, end - base);
   }
 
-  if (!nr_new)
+  if(!nr_new)
     return 0;
 
-  if (!insert) {
+  if(!insert) {
     //if(type->cnt + nr_new > type->max)
     //  panic("test");
     insert = 1;
     goto repeat;
-  }
-  else {
+  } else {
     memblock_merge_regions(type);
     return 0;
   }
@@ -128,32 +127,32 @@ void __next_mem_range_rev(u64* idx, struct memblock_type* type_a, struct membloc
   int idx_a = *idx & 0xffffffff;
   int idx_b = *idx >> 32;
 
-  if (*idx == (u64)ULLONG_MAX) {
+  if(*idx == (u64)ULLONG_MAX) {
     idx_a = type_a->cnt - 1;
-    if (type_b != 0)
+    if(type_b != 0)
       idx_b = type_b->cnt;
     else
       idx_b = 0;
   }
 
-  for (; idx_a >= 0; idx_a--) {
+  for(; idx_a >= 0; idx_a--) {
 
     struct memblock_region* m = &type_a->regions[idx_a];
 
     u64 m_start = m->base;
     u64 m_end = m->base + m->size;
 
-    if (!type_b) {
-      if (out_start)
+    if(!type_b) {
+      if(out_start)
         *out_start = m_start;
-      if (out_end)
+      if(out_end)
         *out_end = m_end;
       idx_a--;
       *idx = (u32)idx_a | (u64)idx_b << 32;
       return;
     }
 
-    for (; idx_b >= 0; idx_b--) {
+    for(; idx_b >= 0; idx_b--) {
 
       struct memblock_region* r;
       u64 r_start;
@@ -163,13 +162,13 @@ void __next_mem_range_rev(u64* idx, struct memblock_type* type_a, struct membloc
       r_start = idx_b ? r[-1].base + r[-1].size : 0;
       r_end = idx_b < type_b->cnt ? r->base : ULLONG_MAX;
 
-      if (r_end <= m_start)
+      if(r_end <= m_start)
         break;
-      if (m_end > r_start) {
+      if(m_end > r_start) {
         *out_start = max(m_start, r_start);
         *out_end = min(m_end, r_end);
 
-        if (m_start >= r_start)
+        if(m_start >= r_start)
           idx_a--;
         else
           idx_b--;
@@ -193,12 +192,12 @@ u64 __memblock_find_range_top_down(u64 start, u64 end, u64 size, u64 align) {
     this_end = clamp(this_end, start, end);
 
     // The data is unsigned, so need to judge
-    if (this_end < size)
+    if(this_end < size)
       continue;
 
     cand = round_down(this_end - size, align);
 
-    if (cand >= this_start) {
+    if(cand >= this_start) {
       //cprintf("find success %x\n", cand);
       return cand;
     }
@@ -210,7 +209,7 @@ u64 __memblock_find_range_top_down(u64 start, u64 end, u64 size, u64 align) {
 // Find the suitable memory segment
 u64 memblock_find_in_range(u64 size, u64 align, u64 start, u64 end) {
 
-  if (end == MEMBLOCK_ALLOC_ACCESSIBLE)
+  if(end == MEMBLOCK_ALLOC_ACCESSIBLE)
     end = memblock.current_limit;
 
   start = max(start, PGSIZE);
@@ -225,7 +224,7 @@ static u64 memblock_alloc_range(u64 size, u64 align, u64 start, u64 end) {
   u64 found;
 
   found = memblock_find_in_range(size, align, start, end);
-  if (found && !memblock_reserve(found, size)) {
+  if(found && !memblock_reserve(found, size)) {
     // watch out the memory leak
     return found;
   }
@@ -245,9 +244,11 @@ u64 memblock_alloc_base(u64 size, u64 align, u64 max_addr) {
 
   alloc = __memblock_alloc_base(size, align, max_addr);
 
-  if (alloc == 0)
+  if(alloc == 0)
     panic("alloc fault");
 
+
+  memset(p2v(alloc), 0, size);
   //cprintf("alloc success\n");
   return alloc;
 }
@@ -264,7 +265,7 @@ int memblock_isolate_range(struct memblock_type* type, u64 base, u64 size, int* 
 
   *start_rgn = *end_rgn = 0;
 
-  if (!size)
+  if(!size)
     return 0;
 
   for_each_memblock_type(idx, type, rgn) {
@@ -272,25 +273,23 @@ int memblock_isolate_range(struct memblock_type* type, u64 base, u64 size, int* 
     u64 rbase = rgn->base;
     u64 rend = rbase + rgn->size;
 
-    if (rbase >= end)
+    if(rbase >= end)
       break;
-    if (rend <= base)
+    if(rend <= base)
       continue;
 
-    if (rbase < base) {
+    if(rbase < base) {
       rgn->base = base;
       rgn->size -= base - rbase;
       type->total_size -= base - rbase;
       memblock_insert_region(type, idx, rbase, base - rbase);
-    }
-    else if (rend > end) {
+    } else if(rend > end) {
       rgn->base = end;
       rgn->size -= end - rbase;
       type->total_size -= end - rbase;
       memblock_insert_region(type, idx--, rbase, end - rbase);
-    }
-    else {
-      if (!*end_rgn)
+    } else {
+      if(!*end_rgn)
         *start_rgn = idx;
       *end_rgn = idx + 1;
     }
@@ -304,10 +303,10 @@ int memblock_remove_range(struct memblock_type* type, u64 base, u64 size) {
   int i, ret;
 
   ret = memblock_isolate_range(type, base, size, &start_rgn, &end_rgn);
-  if (ret)
+  if(ret)
     return ret;
 
-  for (i = end_rgn - 1; i >= start_rgn; i--)
+  for(i = end_rgn - 1; i >= start_rgn; i--)
     memblock_remove_region(type, i);
 }
 
@@ -343,11 +342,11 @@ void memblock_init() {
   memblock.reserved.regions[0].size = 0;
 
   u32 mem_tot = 0;
-  for (int i = 0; i < 32; i++) {
-    if (ARDS->map[i].type < 1 || ARDS->map[i].type > 4) break;
+  for(int i = 0; i < 32; i++) {
+    if(ARDS->map[i].type < 1 || ARDS->map[i].type > 4) break;
     mem_tot += ARDS->map[i].len;
     //cprintf("%l %l %x\n", ARDS->map[i].addr, ARDS->map[i].addr+ARDS->map[i].len, ARDS->map[i].type);
-    if (ARDS->map[i].type == 1) {
+    if(ARDS->map[i].type == 1) {
       memblock_add(ARDS->map[i].addr, ARDS->map[i].len);
       memblock.current_limit = max(memblock.current_limit, ARDS->map[i].addr + ARDS->map[i].len);
       //cprintf("%l %l\n", ARDS->map[i].addr, ARDS->map[i].len);

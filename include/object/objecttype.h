@@ -8,3 +8,4 @@
 #include <arch/object/structures.h>
 #include <object/interrupt.h>
 
+Cap create_object(u64 objectType, void* regionBase, u64 userSize, bool deviceMemory);
