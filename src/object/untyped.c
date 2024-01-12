@@ -21,7 +21,7 @@ Exception invoke_untyped_retype(Cte* srcSlot, bool reset,
     /* Update the amount of free space left in this untyped cap.
      *
      * Note that userSize is not necessarily the true size of the object in
-     * memory. In the case where newType is seL4_CapTableObject, the size is
+     * memory. In the case where newType is os_CapTableObject, the size is
      * transformed by getObjectSize. */
 
     totalObjectSize = destLength << get_object_size(newType, userSize);

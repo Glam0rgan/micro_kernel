@@ -29,6 +29,9 @@
 // Generate a cte_t pointer from a tcb_t pointer
 #define TCB_PTR_CTE_PTR(p,i)\
   (((Cte *)((u64)(p)&~MASK(os_TCBBits)))+(i))
+
+#define TCB_SIZE_BITS (os_TCBBits - 1)
+
 typedef u64 OsCapRights;
 
 // High means to calculate from the high bit
