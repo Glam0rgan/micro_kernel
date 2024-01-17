@@ -14,7 +14,7 @@ void arch_init_context(UserContext* context) {
     context->registers[Error] = 0;
     context->registers[FaultIP] = 0;
     context->registers[NextIP] = 0;
-    context->registers[CS] = OS_CS_3;
+    context->registers[CS] = OsCS_3;
     context->registers[FLAGS] = FLAGS_USER_DEFAULT;
 
     arch_init_fpu_context(context);

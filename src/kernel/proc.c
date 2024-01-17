@@ -13,14 +13,18 @@ void test() {
 }
 
 void send(OsCPtr dest, OsMessageInfo msgInfo) {
-  Cte* cte = lookup_slot(ksCurThread, 0).slot;
+  Cte* cte = lookup_slot(ksCurThread, dest).slot;
   EndpointCap endpointCap = *(EndpointCap*)&cte->cap;
   send_ipc(1, 0, 0, endpointCap.capCanGrant, endpointCap.capCanGrantReply,
     ksCurThread, endpointCap.capEPPtr);
 
 }
 
-void reply(OsMessageInfo msgInfo) {
-  Cte* cte = lookup_slot(ksCurThread, 0).slot;
+void receive(OsCPtr dest, OsMessageInfo* msgInfo) {
+  Cte* cte = lookup_slot(ksCurThread, dest).slot;
   receive_ipc(ksCurThread, cte->cap, 1);
+}
+
+void printf(char* fmt, ...) {
+
 }

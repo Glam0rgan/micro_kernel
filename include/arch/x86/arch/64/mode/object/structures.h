@@ -1,12 +1,6 @@
 #pragma once
 
-#include <config.h>
-#include <util.h>
-#include <api/types.h>
-#include <arch/types.h>
-#include <arch/machine/hardware.h>
-#include <arch/machine/registerset.h>
-#include <os/arch/constants.h>
+#include <os/macros.h>
 
 typedef Pml4e VspaceRoot;
 
@@ -54,6 +48,7 @@ struct _FrameCap {
 };
 typedef struct _FrameCap FrameCap;
 
+/*
 static inline bool CONST arch_is_cap_revocable(Cap derivedCap, Cap srcCap) {
   switch(derivedCap.capType) {
   case cap_io_port_cap:
@@ -63,7 +58,7 @@ static inline bool CONST arch_is_cap_revocable(Cap derivedCap, Cap srcCap) {
     return false;
   }
 }
-
+*/
 typedef struct _PageTableCap {
   u64 : 4;
   u64 capPTMappedASID : 12;

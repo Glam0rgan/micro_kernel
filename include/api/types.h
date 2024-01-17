@@ -15,7 +15,6 @@ static inline OsMessageInfo CONST messageinfo_from_u64_raw(u64 w) {
   return mi;
 }
 
-
 static inline OsMessageInfo CONST messageinfo_from_u64(u64 w) {
   OsMessageInfo mi;
   u64 len;
@@ -25,8 +24,8 @@ static inline OsMessageInfo CONST messageinfo_from_u64(u64 w) {
 
   // Fix the length.
   len = mi.length;
-  if(len > os_MsgMaxLength) {
-    mi.length = os_MsgMaxLength;
+  if(len > OsMsgMaxLength) {
+    mi.length = OsMsgMaxLength;
   }
 
   return mi;

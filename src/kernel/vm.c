@@ -1,8 +1,9 @@
-#include "types.h"
-#include "defs.h"
-#include "mmu.h"
-#include "memlayout.h"
-#include "vm.h"
+#include <types.h>
+#include <defs.h>
+#include <mmu.h>
+#include <memlayout.h>
+#include <vm.h>
+#include <tcb.h>
 
 #define kernelFirstSize 0x4000000
 #define KernelFirstHasMappedEnd  0xFFFFFFFF84000000
@@ -26,8 +27,8 @@ static u64* page_walk(u64* root, const void* va, int alloc) {
   // Page map level 4 index
   pml4e = &root[PML4X(va)];
 
-  if (!(*pml4e & PTE_P)) {
-    if (!alloc || (pml4e = (u64*)memblock_alloc_kernel(PGSIZE, PGSIZE)) == 0)
+  if(!(*pml4e & PTE_P)) {
+    if(!alloc || (pml4e = (u64*)memblock_alloc_kernel(PGSIZE, PGSIZE)) == 0)
       return 0;
     memset(pml4e, 0, PGSIZE);
     root[PML4X(va)] = v2p(pml4e) | PTE_P | PTE_W | PTE_U;
@@ -36,8 +37,8 @@ static u64* page_walk(u64* root, const void* va, int alloc) {
   // Page directory pointer index
   pdpte = &pdpte[PDPTX(va)];
 
-  if (!(*pdpte & PTE_P)) {
-    if (!alloc || (pdpte = (u64*)memblock_alloc_kernel(PGSIZE, PGSIZE)) == 0)
+  if(!(*pdpte & PTE_P)) {
+    if(!alloc || (pdpte = (u64*)memblock_alloc_kernel(PGSIZE, PGSIZE)) == 0)
       return 0;
     memset(pdpte, 0, PGSIZE);
     pml4e[PDPTX(va)] = v2p(pdpte) | PTE_P | PTE_W | PTE_U;
@@ -46,8 +47,8 @@ static u64* page_walk(u64* root, const void* va, int alloc) {
   // Page directory index
   pde = &pde[PDX(va)];
 
-  if (!(*pde & PTE_P)) {
-    if (!alloc || (pde = (u64*)memblock_alloc_kernel(PGSIZE, PGSIZE)) == 0)
+  if(!(*pde & PTE_P)) {
+    if(!alloc || (pde = (u64*)memblock_alloc_kernel(PGSIZE, PGSIZE)) == 0)
       return 0;
     memset(pde, 0, PGSIZE);
     pdpte[PDX(va)] = v2p(pde) | PTE_P | PTE_W | PTE_U;
@@ -56,8 +57,8 @@ static u64* page_walk(u64* root, const void* va, int alloc) {
   // Page table index
   pte = &pte[PTX(va)];
 
-  if (!(*pte & PTE_P)) {
-    if (!alloc || (pte = (u64*)memblock_alloc_kernel(PGSIZE, PGSIZE)) == 0)
+  if(!(*pte & PTE_P)) {
+    if(!alloc || (pte = (u64*)memblock_alloc_kernel(PGSIZE, PGSIZE)) == 0)
       return 0;
     memset(pte, 0, PGSIZE);
     pde[PTX(va)] = v2p(pte) | PTE_P | PTE_W | PTE_U;
@@ -75,13 +76,13 @@ static int map_pages(u64* pml4, void* va, u64 size, u64 pa, int perm) {
 
   first = (char*)ALIGN_DOWN(((u64)va), ((u64)PGSIZE));
   last = (char*)ALIGN_DOWN(((u64)va), ((u64)PGSIZE));
-  while (1) {
-    if (pte = page_walk(pml4, first, 1) == 0)
+  while(1) {
+    if(pte = page_walk(pml4, first, 1) == 0)
       return -1;
-    if (*pte & PTE_P)
+    if(*pte & PTE_P)
       panic("remap");
     *pte = pa | perm | PTE_P;
-    if (first == last)
+    if(first == last)
       break;
     first += PGSIZE;
     pa += PGSIZE;
@@ -110,14 +111,14 @@ u64* setup_user_memory_pages(void) {
 int alloc_uvm(u64* pml4, u64 oldSize, u64 newSize) {
   char* mem;
 
-  if (newSize < oldSize)
+  if(newSize < oldSize)
     return oldSize;
 
   u64 oldSizeAlign = PGROUNDUP(oldSize);
   mem = memblock_alloc(newSize - oldSize, PGSIZE);
 
   // Dealloc has memset zero.
-  for (;oldSizeAlign < newSize;oldSizeAlign += PGSIZE, mem += PGSIZE) {
+  for(;oldSizeAlign < newSize;oldSizeAlign += PGSIZE, mem += PGSIZE) {
     map_pages(pml4, (char*)oldSizeAlign, PGSIZE, v2p(mem), PTE_W | PTE_U);
   }
   return newSize;
@@ -130,12 +131,12 @@ int copy_uvm(u64* pml4, u64 va, void* src, u64 len) {
   char* buf, * ka;
 
   buf = (char*)src;
-  while (len > 0) {
+  while(len > 0) {
     vaAlign = (u64)PGROUNDDOWN(va);
     ka = (char*)p2v((PTE_ADDR(*(page_walk(pml4, (char*)vaAlign, 0)))));
 
     size = PGSIZE - (va - vaAlign);
-    if (size > len)
+    if(size > len)
       size = len;
     memmove(ka + (va - vaAlign), buf, size);
     len -= size;
@@ -151,7 +152,7 @@ void clear_pteu(u64* pml4, char* va) {
   u64* pte;
 
   pte = page_walk(pml4, va, 0);
-  if (pte == 0)
+  if(pte == 0)
     panic("clear_pteu");
   *pte &= ~PTE_U;
 }
@@ -169,10 +170,10 @@ void vm_init(void) {
 
   kernPd = memblock_alloc_kernel(PGSIZE, PGSIZE);
   kernPdpt[510] = v2p(kernPd) | PTE_W | PTE_P;
-  for (u64 pdOffset = 0;pdOffset < 32;pdOffset++) {
+  for(u64 pdOffset = 0;pdOffset < 32;pdOffset++) {
     kernPt = memblock_alloc_kernel(PGSIZE, PGSIZE);
     kernPd[pdOffset] = v2p(kernPt) | PTE_W | PTE_P;
-    for (u64 ptOffset = 0;ptOffset < 512;ptOffset++) {
+    for(u64 ptOffset = 0;ptOffset < 512;ptOffset++) {
       kernPt[pdOffset] = KERNBASE + 0x200000 * pdOffset + 0x1000 * pdOffset;
     }
   }

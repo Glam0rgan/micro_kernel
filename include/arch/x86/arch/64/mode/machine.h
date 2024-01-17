@@ -5,6 +5,9 @@
 #include <arch/model/statedata.h>
 #include <arch/machine/cpu_registers.h>
 #include <arch/machine.h>
+#include <mode/object/structures.h>
+
+extern Cr3 x64KSCurrentCR3;
 
 static inline Cr3 make_cr3(PAddr addr) {
     Cr3 cr3;

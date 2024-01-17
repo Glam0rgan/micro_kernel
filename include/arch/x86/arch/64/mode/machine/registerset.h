@@ -60,6 +60,6 @@ enum Register {
   n_contextRegisters = 24    /* 0xc0 */
 };
 
-typedef u32 Register;
+typedef uint32_t Register;
 
 extern const Register msgRegisters[];

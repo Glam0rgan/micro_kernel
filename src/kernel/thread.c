@@ -21,7 +21,7 @@ void do_ipc_transfer(Tcb* sender, Endpoint* endpoint,
   receiveBuffer = lookup_ipc_buffer(true, receiver);
 
   // Guarantee the sender has no fault
-  if(likely(sender->tcbFault.os_FaultType) == os_Fault_NullFault) {
+  if(likely(sender->tcbFault.OsFaultType) == OsFault_NullFault) {
     sendBuffer = lookup_ipc_buffer(false, sender);
     do_normal_transfer(sender, sendBuffer, endpoint, badge,
       grant, receiver, receiveBuffer);
@@ -95,7 +95,7 @@ static OsMessageInfo transfer_caps(OsMessageInfo info,
 
   destSlot = get_receive_slots(receiver, receiveBuffer);
 
-  for(i = 0; i < os_MsgMaxExtraCaps && currentExtraCaps.excaprefs[i] != NULL; i++) {
+  for(i = 0; i < OsMsgMaxExtraCaps && currentExtraCaps.excaprefs[i] != NULL; i++) {
     Cte* slot = currentExtraCaps.excaprefs[i];
     Cap cap = slot->cap;
     EndpointCap endpointCap = *(EndpointCap*)(&cap);

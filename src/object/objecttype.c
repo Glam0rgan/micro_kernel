@@ -24,13 +24,13 @@ u64 get_object_size(u64 objectType, u64 userObjectSize) {
 
     switch(objectType) {
     case osTCBObject:
-        return os_TCBBits;
+        return OsTCBBits;
     case osEndpointObject:
-        return os_EndpointBits;
+        return OsEndpointBits;
     case osNotificationObject:
-        return os_NotificationBits;
+        return OsNotificationBits;
     case osCapTableObject:
-        return os_SlotBits + userObjectSize;
+        return OsSlotBits + userObjectSize;
     case osUntypedObject:
         return userObjectSize;
     default:
@@ -133,26 +133,26 @@ u64 CONST cap_get_cap_size_bits(Cap cap) {
         return untypedCap.capBlockSize;
 
     case cap_endpoint_cap:
-        return os_EndpointBits;
+        return OsEndpointBits;
 
     case cap_notification_cap:
-        return os_NotificationBits;
+        return OsNotificationBits;
 
     case cap_cnode_cap:
         CNodeCap cNodeCap = *(CNodeCap*)(&cap);
-        return cNodeCap.capCNodeRadix + os_SlotBits;
+        return cNodeCap.capCNodeRadix + OsSlotBits;
 
     case cap_thread_cap:
-        return os_TCBBits;
+        return OsTCBBits;
 
     case cap_zombie_cap: {
         ZombieCap zombieCap = *(ZombieCap*)(&cap);
         u64 type = zombieCap.capZombieType;
         if(type == ZombieType_ZombieTCB) {
-            return os_TCBBits;
+            return OsTCBBits;
         }
         // need fix
-        return ZombieType_ZombieCNode(type) + os_SlotBits;
+        return ZombieType_ZombieCNode(type) + OsSlotBits;
     }
 
     case cap_null_cap:

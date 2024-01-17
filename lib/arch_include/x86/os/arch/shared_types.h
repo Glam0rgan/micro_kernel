@@ -1,3 +1,5 @@
+#pragma once
+
 enum OsFaultType {
   NullFault = 0,
   CapFault = 1,

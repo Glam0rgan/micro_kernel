@@ -41,7 +41,7 @@ void send_signal(Notification* ntfnPtr, u64 badge) {
             would also trigger this path. I.e, a thread
             with a bound notification will not be awakened
             by signals on that bound notification if it is
-            in the middle of an seL4_Call.
+            in the middle of an OsCall.
             */
             // ???????
             ntfn_set_active(ntfnPtr, badge);

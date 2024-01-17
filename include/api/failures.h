@@ -28,5 +28,5 @@ struct _SyscallError {
 typedef struct _SyscallError SyscallError;
 
 extern LookupFault currentLookupFault;
-extern OsFault currentFault;
+extern OsFaultType currentFault;
 extern SyscallError currentSyscallError;

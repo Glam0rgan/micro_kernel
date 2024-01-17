@@ -1,8 +1,9 @@
 #pragma once
 
-#include <types.h>
-#include <ctypes.h>
+#include <api/types.h>
+#include <stdint.h>
 #include <os/os_arch/constants.h>
+#include <os/constants.h>
 #include <arch/object/structures.h>
 
 #define wordRadix 6
@@ -25,12 +26,12 @@
 // 0     a             b                   c
 // a = tcbCNodeEntries * sizeof(cte_t)
 // b = BIT(TCB_SIZE_BITS)
-// c = BIT(os_TCBBits)
+// c = BIT(OsTCBBits)
 // Generate a cte_t pointer from a tcb_t pointer
 #define TCB_PTR_CTE_PTR(p,i)\
-  (((Cte *)((u64)(p)&~MASK(os_TCBBits)))+(i))
+  (((Cte *)((u64)(p)&~MASK(OsTCBBits)))+(i))
 
-#define TCB_SIZE_BITS (os_TCBBits - 1)
+#define TCB_SIZE_BITS (OsTCBBits - 1)
 
 typedef u64 OsCapRights;
 
@@ -227,7 +228,15 @@ typedef struct _GuardMismatch {
   u64 lufType : 2;
 }GuardMismatch;
 
-enum LufType {
+enum OsFaultType {
+  NullFault = 0,
+  CapFault = 1,
+  UnkownSyscall = 2,
+  UserException = 3,
+  VMFault = 4
+};
+
+enum LookupFault {
   invalidRoot = 0,
   missingCapability,
   depthMismatch,
@@ -307,21 +316,17 @@ struct _Tcb {
 
   LookupFault tcbLookupFailure;
 
-  Dom tcbDomain;
+  //Dom tcbDomain;
 
-  Prio tcbMcp;
+  //Prio tcbMcp;
 
-  Prio tcbPriority;
+  //Prio tcbPriority;
 
-  u64 tcbTimeSlice;
+  //u64 tcbTimeSlice;
 
-  Cptr tcbFaultHandler;
+  //Cptr tcbFaultHandler;
 
   u64 tcbIPCBuffer;
-
-#ifdef ENABLE_SMP_SUPPORT
-  u64 tcbAffinity;
-#endif  
 
   struct _Tcb* tcbSchedNext;
   struct _Tcb* tcbSchedPrev;
@@ -332,12 +337,12 @@ struct _Tcb {
 typedef struct _Tcb Tcb;
 typedef struct _IpcBuffer {
   OsMessageInfo tag;
-  u64 msg[msg_max_length];
+  u64 msg[Os_MsgMaxLength];
   u64 userData;
-  u64 capsOrBadges[msg_max_extra_caps];
-  Cptr receiveCNode;
-  Cptr receiveIndex;
-  Cptr receiveDepth;
+  u64 capsOrBadges[Os_MsgMaxExtraCaps];
+  u64 receiveCNode;
+  u64 receiveIndex;
+  u64 receiveDepth;
 }IpcBuffer __attribute__((__aligned__(sizeof(struct IpcBuffer_))));
 
 enum EndpointState {
@@ -370,17 +375,17 @@ typedef struct _Cte {
   MdbNode cteMdbNode;
 }Cte;
 
-static inline u64 CONST generic_frame_cap_get_capFIsDevice(cap_t cap) {
+/*static inline u64 CONST generic_frame_cap_get_capFIsDevice(cap_t cap) {
   CapTag ctag;
 
   ctag = cap.capType;
-  /*if(ctag != cap_small_frame_cap &&
+  if(ctag != cap_small_frame_cap &&
        ctag != cap_frame_cap)
       panic();
-  */
-  if(ctag == cap_small_frame_cap) {
-    return cap_small_frame_cap_get_capFIsDevice(cap);
-  } else {
-    return cap_frame_cap_get_capFIsDevice(cap);
-  }
+
+if(ctag == cap_small_frame_cap) {
+  return cap_small_frame_cap_get_capFIsDevice(cap);
+} else {
+  return cap_frame_cap_get_capFIsDevice(cap);
 }
+}*/

@@ -26,7 +26,7 @@ void NORETURN fastpath_call(u64 cptr, u64 msgInfo) {
     // Check there's no extra caps, the length is ok and there
     // is no save fault.
     if(unlikely(fastpath_mi_check(msgInfo) ||
-        faultType != Os_Fault_NullFault)) {
+        faultType != OsFault_NullFault)) {
         slowpath(Syscall);
     }
 

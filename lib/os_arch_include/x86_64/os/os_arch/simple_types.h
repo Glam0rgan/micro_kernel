@@ -1,4 +1,4 @@
 #pragma once
 
-#define OS_WORD_IS_UINT64
-#define OS_INT64_IS_LONG
+#define OsWORD_IS_UINT64
+#define OsINT64_IS_LONG

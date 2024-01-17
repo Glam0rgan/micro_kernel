@@ -5,7 +5,5 @@
 #include <api/failures.h>
 #include <model/statedata.h>
 #include <kernel/vspace.h>
-#include <arch/api/syscall.h>
 
-
-extern extraCaps currentExtraCaps;
+extern ExtraCaps currentExtraCaps;

@@ -2,8 +2,11 @@
 
 void main(void) {
     int num = 1;
-    printf("send the number %l", num);
-    OsCPtr endpoint = get();
-    OsMessageInfo msg = create();
-    os_send(endpoint, msg);
+    OsMessageInfo msg;
+    msg.capsUnwrapped = 0;
+    msg.label = 1;
+    msg.extraCaps = 0;
+    msg.length = 1;
+    printf("send the label %l", msg.label);
+    send(0, msg);
 }

@@ -12,13 +12,13 @@ enum VmPageSize {
 static inline u64 CONST pageBits_forSize(VmPageSize pagesize) {
   switch(pagesize) {
   case X86_SmallPage:
-    return os_PageBits;
+    return OsPageBits;
 
   case X86_LargePage:
-    return os_LargePageBits;
+    return OsLargePageBits;
 
   case X64_HugePage:
-    return os_HugePageBits;
+    return OsHugePageBits;
 
   default:
     panic("Invalid page size");

@@ -68,7 +68,7 @@ LookupSlotRet lookup_slot_for_cnode_op(bool isSource, Cap root, CPtr capptr, u64
   ret.slot = NULL;
 
   if(unlikely(root.capType != cap_cnode_cap)) {
-    currentSyscallError.type = os_FailedLookup;
+    currentSyscallError.type = OsFailedLookup;
     currentSyscallError.failedLookupWasSource = isSource;
     currentLookupFault.lufType = invalidRoot;
     ret.status = EXCEPTION_SYSCALL_ERROR;
@@ -76,7 +76,7 @@ LookupSlotRet lookup_slot_for_cnode_op(bool isSource, Cap root, CPtr capptr, u64
   }
 
   if(unlikely(depth < 1 || depth > wordBits)) {
-    currentSyscallError.type = os_RangeError;
+    currentSyscallError.type = OsRangeError;
     currentSyscallError.rangeErrorMin = 1;
     currentSyscallError.rangeErrorMax = wordBits;
     ret.status = EXCEPTION_SYSCALL_ERROR;
@@ -85,14 +85,14 @@ LookupSlotRet lookup_slot_for_cnode_op(bool isSource, Cap root, CPtr capptr, u64
 
   resRet = resolve_address_bits(root, capptr, depth);
   if(unlikely(resRet.status != EXCEPTION_NONE)) {
-    currentSyscallError.type = os_FailedLookup;
+    currentSyscallError.type = OsFailedLookup;
     currentSyscallError.failedLookupWasSource = isSource;
     ret.status = EXCEPTION_SYSCALL_ERROR;
     return ret;
   }
 
   if(unlikely(resRet.bitsRemaining != 0)) {
-    currentSyscallError.type = os_FailedLookup;
+    currentSyscallError.type = OsFailedLookup;
     currentSyscallError.failedLookupWasSource = isSource;
     // Need fix.
     currentLookupFault.type = Lookup_fault_depth_mismatch;

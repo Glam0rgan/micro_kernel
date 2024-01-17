@@ -75,7 +75,7 @@ Cte* get_receive_slots(Tcb* thread, u64* buffer) {
 }
 
 Cap_Tranfer PURE load_cap_transfer(u64* buffer) {
-    const int offset = os_MsgMaxLength + os_MsgMaxExtraCaps + 2;
+    const int offset = OsMsgMaxLength + OsMsgMaxExtraCaps + 2;
     return capTransfer_from_u64(buffer + offset);
 }
 
