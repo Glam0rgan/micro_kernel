@@ -19,7 +19,7 @@ void load_plugin_init() {
 
 void wait_disk(void) {
     // Wait for disk ready.
-    while ((inb(0x1F7) & 0xC0) != 0x40)
+    while((inb(0x1F7) & 0xC0) != 0x40)
         ;
 }
 
@@ -56,7 +56,7 @@ read_seg(u8* pa, u32 count, u32 offset) {
     // If this is too slow, we could read lots of sectors at a time.
     // We'd write more to memory than asked, but it doesn't matter --
     // we load in increasing order.
-    for (; pa < epa; pa += SECTSIZE, offset++)
+    for(; pa < epa; pa += SECTSIZE, offset++)
         read_sect(pa, offset);
 }
 
@@ -72,7 +72,7 @@ int load_plugin(char*** argv) {
     u64 size, stackPoint;
     u64 argc;
 
-    for (int i = 0;i < pluginNum;++i) {
+    for(int i = 0;i < pluginNum;++i) {
         size = 0;
 
         // Get ElfHdr
@@ -84,9 +84,9 @@ int load_plugin(char*** argv) {
 
         // Load program into memory.
         read_seg((u8*)pluginElf, (elf.phoff + elf.phnum * sizeof(progHdr)), pluginSector);
-        for (cnt = 0, off = elf.phoff; cnt < elf.phnum;i++, off += sizeof(progHdr)) {
+        for(cnt = 0, off = elf.phoff; cnt < elf.phnum;i++, off += sizeof(progHdr)) {
             progHdr = *(ProgHdr*)(pluginElf + off / 4);
-            if (progHdr.type != ELF_PROG_LOAD)
+            if(progHdr.type != ELF_PROG_LOAD)
                 continue;
 
             size = alloc_uvm(pml4, size, progHdr.vaddr + progHdr.memsz);
@@ -101,7 +101,7 @@ int load_plugin(char*** argv) {
         stackPoint = size;
 
         // Push argument strings, prepare rest of stack in userstack.
-        for (argc = 0;argv[cnt][argc];argc++) {
+        for(argc = 0;argv[cnt][argc];argc++) {
             stackPoint = (stackPoint - (strlen(argv[cnt][argc]) + 1)) & ~(sizeof(u64) - 1);
             copy_uvm(pml4, stackPoint, argv[cnt][argc], strlen(argv[cnt][argc] + 1));
             uStack[3 + argc] = stackPoint;

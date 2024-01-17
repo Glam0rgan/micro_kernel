@@ -1,15 +1,19 @@
-#ifdef ENABLE_SMP_SUPPORT
-#define NODE_STATE_ON_CORE(_state, _core)  ksSMP[(_core)].system._state
+#pragma once
 
-#define SMP_COND_STATEMENT(_st)            _st
+#include <config.h>
+#include <types.h>
+#include <object/structures.h>
+#include <object/tcb.h>
+#include <mode/types.h>
 
-#else
 #define NODE_STATE_ON_CORE(_state, _core)  _state
 
 #define SMP_COND_STATEMENT(_st)
 
-#endif
 
 #define SchedulerAction_ResumeCurrentThread ((Tcb*)0)
 #define SchedulerAction_ChooseNewThread ((Tcb*) 1)
 #define NODE_STATE(_state)    NODE_STATE_ON_CORE(_state, get_current_cpu_index())
+
+TcbQueue ksReadyQueues;
+Tcb* ksCurThread;

@@ -1,13 +1,13 @@
 /* for x86-64, the large page size is 2 MiB and huge page size is 1 GiB */
-#define os_WordBits           64
-#define os_WordSizeBits       3
-#define os_PageBits           12
-#define os_SlotBits           5
+#define OsWordBits           64
+#define OsWordSizeBits       3
+#define OsPageBits           12
+#define OsSlotBits           5
 #if CONFIG_XSAVE_SIZE >= 832
-#define os_TCBBits         12
+#define  OsTCBBits         12
 #else
-#define os_TCBBits         11
+#define OsTCBBits         11
 #endif
 
-#define os_EndpointBits 4
-#define os_NotificationBits 5
+#define OsEndpointBits 4
+#define OsNotificationBits 5

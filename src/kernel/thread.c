@@ -166,7 +166,7 @@ void schedule(void) {
 }
 
 void choose_thread(void) {
-  thread = ksReadyQueue.head;
+  thread = NODE_STATE(ksReadyQueues).head;
   switch_to_thread(thread);
 }
 

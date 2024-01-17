@@ -20,10 +20,21 @@ void ipc_test(void) {
   void* cnodePtrPlugin0 = memblock_alloc_kernel(PGSIZE, PGSIZE);
   void* cnodePtrPlugin1 = memblock_alloc_kernel(PGSIZE, PGSIZE);
 
-  Endpoint* endpointTest = memblock_alloc_kernel(PGSIZE, PGSIZE);
+  // Add to scheduler.
+  tcb_sched_append(tcbPlugin0);
+  tcb_sched_append(tcbPlugin1);
 
   // Use to create cdt.
   Cte* cteRoot = memblock_alloc_kernel(PGSIZE, PGSIZE);
+
+
+
+  // Init the cteRoot.
+  UntypedCap untypedCap = *(UntypedCap*)(&cteRoot->cap);
+  untypedCap.capPtr = memblock_alloc_kernel(PGSIZE, PGSIZE);
+  cteRoot->cap = *(Cap*)(&untypedCap);
+  cteRoot->cteMdbNode.mdbPrev = NULL;
+  cteRoot->cteMdbNode.mdbNext = NULL;
 
   // Init the CNodeCap.
   create_new_object(osCapTableObject, cteRoot,
@@ -34,17 +45,25 @@ void ipc_test(void) {
     TCB_PTR_CTE_PTR(tcbPlugin1, tcbCTable), 0, 1,
     cnodePtrPlugin1, 0, 0);
 
-  // Init the cteRoot.
-  UntypedCap untypedCap = *(UntypedCap*)(&cteRoot->cap);
-  untypedCap.capPtr = memblock_alloc_kernel(PGSIZE, PGSIZE);
-  cteRoot->cap = *(Cap*)(&untypedCap);
-  cteRoot->cteMdbNode.mdbPrev = NULL;
-  cteRoot->cteMdbNode.mdbNext = NULL;
+  // Allocate caps by root_task (need capdl).
+  // Create endpoint and endpointcap.
+  Endpoint* endpointTest = memblock_alloc_kernel(PGSIZE, PGSIZE);
+  Cap capTest = create_object(osEndpointObject, endpointTest, 0, 0);
 
+  // Insert cap to the cspace.
+  insert_new_cap(cteRoot,
+    lookup_slot(tcbPlugin0, 0).slot,
+    capTest);
+
+  insert_new_cap(cteRoot,
+    lookup_slot(tcbPlugin1, 0).slot,
+    capTest);
 
 }
 
 int main(void) {
+
+  // Init kernel.
   vm_init();
   memblock_init();
   lapic_init();
@@ -56,5 +75,7 @@ int main(void) {
 
   ipc_test();
 
+  // 
+  schedule();
   panic("ok");
 }

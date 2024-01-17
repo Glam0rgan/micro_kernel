@@ -4,6 +4,8 @@
 #include <util.h>
 #include <tcb.h>
 #include <arch/x86/arch/64/mode/machine/registerset.h>
+#include <model/statedata.h>
+#include <cspace.h>
 
 ExtraCaps currentExtraCaps;
 
@@ -119,19 +121,11 @@ void set_extra_badge(u64* bufferPtr, u64 badge, u64 i) {
 void tcb_sched_enqueue(Tcb* tcb) {
   if(!tcb->tcbState.tcbQueued) {
     TcbQueue queue;
-    Dom dom;
-    Prio prio;
-    u64 idx;
 
-    dom = tcb->tcbDomain;
-    prio = tcb->tcbPriority;
-    idx = ready_queues_index(dom, prio);
-    queue = NODE_STATE_ON_CORE(ksReadyQueues[idx], tcb->tcbAffinity);
+    queue = ksReadyQueues;
 
     if(!queue.head) { // Empty List
       queue.end = tcb;
-      // fix
-      // add_to_bitmap();
     } else {
       queue.head->tcbSchedPrev = tcb;
     }
@@ -139,9 +133,9 @@ void tcb_sched_enqueue(Tcb* tcb) {
     tcb->tcbSchedNext = queue.head;
     queue.head = tcb;
 
-    NODE_STATE_ON_CORE(ksReadyQueues[idx], tcb->tcbAffinity) = queue;
+    ksReadyQueues = queue;
 
-    &tcb->tcbState.tcbQueued = true;
+    tcb->tcbState.tcbQueued = true;
   }
 }
 
@@ -149,19 +143,11 @@ void tcb_sched_enqueue(Tcb* tcb) {
 void tcb_sched_append(Tcb* tcb) {
   if(!tcb->tcbState.tcbQueued) {
     TcbQueue queue;
-    Dom dom;
-    Prio prio;
-    u64 idx;
 
-    dom = tcb->tcbDomain;
-    prio = tcb->tcbPriority;
-    idx = ready_queues_index(dom, prio);
-    queue = NODE_STATE_ON_CORE(ksReadyQueues[idx], tcb->tcbAffinity);
+    queue = ksReadyQueues;
 
     if(!queue.head) { // Empty List
       queue.head = tcb;
-      // fix
-      // add_to_bitmap();
     } else {
       queue.end->tcbSchedPrev = tcb;
     }
@@ -169,9 +155,9 @@ void tcb_sched_append(Tcb* tcb) {
     tcb->tcbSchedNext = NULL;
     queue.end = tcb;
 
-    NODE_STATE_ON_CORE(ksReadyQueues[idx], tcb->tcbAffinity) = queue;
+    ksReadyQueues = queue;
 
-    &tcb->tcbState.tcbQueued = true;
+    tcb->tcbState.tcbQueued = true;
   }
 }
 
@@ -179,22 +165,15 @@ void tcb_sched_append(Tcb* tcb) {
 void tcb_sched_dequeue(Tcb* tcb) {
   if(tcb->tcbState.tcbQueued) {
     TcbQueue queue;
-    Dom dom;
-    Prio prio;
-    u64 idx;
 
-    dom = tcb->tcbDomain;
-    prio = tcb->tcbPriority;
-    idx = ready_queues_index(dom, prio);
-    queue = NODE_STATE_ON_CORE(ksReadyQueues[idx], tcb->tcbAffinity);
+    queue = ksReadyQueues;
 
     if(tcb->tcbSchedPrev) {
       tcb->tcbSchedPrev->tcbSchedNext = tcb->tcbSchedNext;
     } else {
       queue.head = tcb->tcbSchedNext;
       if(likely(!tcb->tcbSchedNext)) {
-        // fix
-        // remove_from_bitmap
+
       }
     }
 
@@ -204,13 +183,12 @@ void tcb_sched_dequeue(Tcb* tcb) {
     } else {
       queue.end = tcb->tcbSchedPrev;
       if(likely(!tcb->tcbSchedPrev)) {
-        // fix
-        // remove_from_bitmap
+
       }
     }
 
-    NODE_STATE_ON_CORE(ksReadyQueues[idx], tcb->tcbAffinity) = queue;
+    ksReadyQueues = queue;
 
-    &tcb->tcbState.tcbQueued = false;
+    tcb->tcbState.tcbQueued = false;
   }
 }

@@ -152,8 +152,10 @@ ResolveAddressBitsRet resolve_address_bits(Cap nodeCap, CPtr capPtr, u64 nBits) 
     return ret;
   }
 
+  // Simplify the address.
   offset = capPtr;
   slot = CTE_PTR(cnodeCap.capCNodePtr << 1) + offset;
+  levelBits = 0;
 
   if(likely(levelBits == 0)) {
     ret.status = EXCEPTION_NONE;

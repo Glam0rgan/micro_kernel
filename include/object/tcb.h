@@ -8,16 +8,11 @@
 #include <object/cnode.h>
 
 void tcb_sched_enqueue(Tcb* tcb);
+void tcb_sched_append(Tcb* tcb);
+void tcb_sched_dequeue(Tcb* tcb);
 
-#ifdef ENABLE_SMP_SUPPORT
-#define SCHED_ENQUEUE(_t) do {      \
-    tcb_sched_enqueue(_t);            \
-    remote_queue_update(_t);          \
-} while (0)
-
-#else
 #define SCHED_ENQUEUE(_t)           tcb_sched_enqueue(_t)
-#endif
+
 
 typedef struct _TcbQueue {
   Tcb* head;
