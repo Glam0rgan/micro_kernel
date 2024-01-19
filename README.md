@@ -5,8 +5,8 @@ This is a micro-kernel implementation entirely depends on os.
 - [os-manual](https://os.systems/Info/Docs/os-manual-latest.pdf "os-manual")
 
 ## TODOs
-- [ ] fix bug
-- [ ] trap
+- [X] fix bug
+- [X] trap
 - [ ] makefile
 - [ ] fix bug for compling
 - [ ] endpoint test
