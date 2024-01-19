@@ -4,5 +4,7 @@ void main(void) {
     int num = 1;
     OsMessageInfo msg;
     receive(0, &msg);
-    printf("receive the number %l", msg.label);
+    OsWord id;
+    id = os_get_mr(0);
+    printf("receive the id %l", id);
 }

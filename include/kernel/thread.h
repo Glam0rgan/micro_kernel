@@ -5,6 +5,8 @@
 #include <object/structures.h>
 #include <arch/machine.h>
 
+Tcb* ksSchedulerAction;
+
 /*
 static inline CONST u64 ready_queues_index(u64 dom, u64 prio) {
     if(numDomains > 1) {

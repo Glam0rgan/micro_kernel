@@ -12,7 +12,7 @@ ExtraCaps currentExtraCaps;
 Exception lookup_extra_caps(Tcb* thread, u64* bufferPtr, OsMessageInfo info) {
 
   LookupSlotRawRet luRet;
-  Cptr cptr;
+  CPtr cptr;
   u64 i, length;
 
   // If the buffer pointer is Null, set the extra_caps
@@ -41,7 +41,7 @@ Exception lookup_extra_caps(Tcb* thread, u64* bufferPtr, OsMessageInfo info) {
     currentExtraCaps.excaprefs[i] = luRet.slot;
   }
 
-  if(i < OsMsgMaxExtraCaps) {
+  if(i < Os_MsgMaxExtraCaps) {
     currentExtraCaps.excaprefs[i] = NULL;
   }
 
@@ -54,7 +54,7 @@ u64 copyMRs(Tcb* sender, u64* sendBuf, Tcb* receiver,
   u64 i;
 
   // Copy inline words (in registers)
-  for(i = 0; i < n && i < n_msgRegisters; i++) {
+  for(i = 0; i < n && i < Os_MsgMaxLength; i++) {
     set_register(receiver, msgRegisters[i],
       get_register(sender, msgRegisters[i]));
   }
@@ -106,15 +106,15 @@ TcbQueue tcb_ep_dequeue(Tcb* tcb, TcbQueue queue) {
 }
 
 // Get the capability pointer position i in ipc_buffer
-Cptr PURE get_extra_cptr(u64* bufferPtr, u64 i) {
+CPtr PURE get_extra_cptr(u64* bufferPtr, u64 i) {
   // The buffer structer
   // tag(8 bytes) msg(8* OsMsgMaxLength bytes ) user_data(8 byrtes)
   // caps_or_badges
-  return (Cptr)bufferPtr[OsMsgMaxLength + 2 + i];
+  return (CPtr)bufferPtr[Os_MsgMaxLength + 2 + i];
 }
 
 void set_extra_badge(u64* bufferPtr, u64 badge, u64 i) {
-  bufferPtr[OsMsgMaxLength + 2 + i] = badge;
+  bufferPtr[Os_MsgMaxLength + 2 + i] = badge;
 }
 
 // Add TCB to the head of a scheduler queue.

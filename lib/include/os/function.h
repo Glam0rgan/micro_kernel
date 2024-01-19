@@ -4,19 +4,19 @@
 
 extern __thread OsIPCBuffer* __osIPCBuffer;
 
-static inline void Osset_ipcBuffer(OsIPCBuffer* ipcBuffer) {
+static inline void os_set_ipcBuffer(OsIPCBuffer* ipcBuffer) {
     __osIPCBuffer = ipcBuffer;
     return;
 }
 
-static inline OsIPCBuffer* Osget_ipcBuffer(void) {
+static inline OsIPCBuffer* os_get_ipcBuffer(void) {
     return __osIPCBuffer;
 }
 
-static inline OsWord OsgetMR(int i) {
-    return Osget_ipcBuffer()->msg[i];
+static inline OsWord os_get_mr(int i) {
+    return os_get_ipcBuffer()->msg[i];
 }
 
-static inline void OssetMr(int i, OsWord mr) {
-    Osget_ipcBuffer()->msg[i] = mr;
+static inline void os_set_mr(int i, OsWord mr) {
+    os_get_ipcBuffer()->msg[i] = mr;
 }

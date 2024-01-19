@@ -7,6 +7,8 @@ void main(void) {
     msg.label = 1;
     msg.extraCaps = 0;
     msg.length = 1;
-    printf("send the label %l", msg.label);
+    OsWord id = 155;
+    os_set_mr(0, id);
+    printf("send the word %l", id);
     send(0, msg);
 }

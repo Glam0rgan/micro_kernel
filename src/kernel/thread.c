@@ -1,6 +1,5 @@
 #include <api/types.h>
 #include <object.h>
-#include <api/faults.h>
 #include <util.h>
 #include <kernel/cspace.h>
 #include <kernel/thread.h>
@@ -9,6 +8,9 @@
 #include <arch/machine.h>
 #include <arch/kernel/thread.h>
 #include <machine/registerset.h>
+#include <object/structures.h>
+
+extern ExtraCaps currentExtraCaps;
 
 // Get the Buffer from tcb sender anb receiver
 // next invoke do_normal_transfer if ok
@@ -21,7 +23,7 @@ void do_ipc_transfer(Tcb* sender, Endpoint* endpoint,
   receiveBuffer = lookup_ipc_buffer(true, receiver);
 
   // Guarantee the sender has no fault
-  if(likely(sender->tcbFault.OsFaultType) == OsFault_NullFault) {
+  if(likely(sender->tcbFault.OsFaultType) == NullFault) {
     sendBuffer = lookup_ipc_buffer(false, sender);
     do_normal_transfer(sender, sendBuffer, endpoint, badge,
       grant, receiver, receiveBuffer);
@@ -46,10 +48,10 @@ void do_normal_transfer(Tcb* sender, u64* sendBuffer, Endpoint* endpoint,
 
     // If return exception, set excaprefs Null.
     if(unlikely(status != EXCEPTION_NONE)) {
-      current_extra_caps.excaprefs[0] = NULL;
+      currentExtraCaps.excaprefs[0] = NULL;
     }
   } else { // If don't grant , set excaprefs Null.
-    current_extra_caps.excaprefs[0] = NULL;
+    currentExtraCaps.excaprefs[0] = NULL;
   }
 
   // Copy sendBuffer to receiveBuffer.
@@ -73,7 +75,7 @@ void do_fault_transfer(u64 badge, Tcb* sender, Tcb* reveiver,
 // to add ksSchedulerAction to the scheduler queue
 void schedule_tcb(Tcb* tptr) {
   if(tptr == NODE_STATE(ksCurThread) &&
-    NODE_STATE(ksSchedulerAction) == SchedulerAction_ResumCurrentThread &&
+    NODE_STATE(ksSchedulerAction) == SchedulerAction_ResumeCurrentThread &&
     !isSchedulable(tptr)) {
     reschedule_required();
   }
@@ -82,7 +84,7 @@ void schedule_tcb(Tcb* tptr) {
 // Like getReceiveSlots, this is specialised for single-cap transfer.
 static OsMessageInfo transfer_caps(OsMessageInfo info,
   Endpoint* endpoint, Tcb* receiver, u64* receiveBuffer) {
-  u64 i;
+  int i;
   Cte* destSlot;
 
   info.extraCaps = 0;
@@ -95,7 +97,7 @@ static OsMessageInfo transfer_caps(OsMessageInfo info,
 
   destSlot = get_receive_slots(receiver, receiveBuffer);
 
-  for(i = 0; i < OsMsgMaxExtraCaps && currentExtraCaps.excaprefs[i] != NULL; i++) {
+  for(i = 0; i < Os_MsgMaxExtraCaps && currentExtraCaps.excaprefs[i] != NULL; i++) {
     Cte* slot = currentExtraCaps.excaprefs[i];
     Cap cap = slot->cap;
     EndpointCap endpointCap = *(EndpointCap*)(&cap);
@@ -177,10 +179,7 @@ if it will be picked. Instead, it waits in the 'ksSchedulerAction' site
 on which the scheduler will take action.
 */
 void possible_switch_to(Tcb* target) {
-  if(ksCurDomain != target->tcbDomain
-    SMP_COND_STATEMENT(|| target->tcbAffinity != getCurrentCPUIndex())) {
-    SCHED_ENQUEUE(target);
-  } else if(NODE_STATE(ksSchedulerAction) != SchedulerAction_resumeCurrentThread) {
+  if(NODE_STATE(ksSchedulerAction) != SchedulerAction_ResumeCurrentThread) {
     // Too many threads want special treatment, use regular queues.
     reschedule_required();
     SCHED_ENQUEUE(target);

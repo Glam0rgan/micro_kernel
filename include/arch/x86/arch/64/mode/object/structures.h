@@ -31,6 +31,33 @@ typedef Pml4e VspaceRoot;
 #define PT_PTR(r)    ((Pte *)(r))
 #define PT_REF(p)    ((u64)(p))
 
+typedef struct Trapframe_t {
+  u64 eax;      // rax
+  u64 rbx;
+  u64 rcx;
+  u64 rdx;
+  u64 rbp;
+  u64 rsi;
+  u64 rdi;
+  u64 r8;
+  u64 r9;
+  u64 r10;
+  u64 r11;
+  u64 r12;
+  u64 r13;
+  u64 r14;
+  u64 r15;
+
+  u64 trapno;
+  u64 err;
+
+  u64 rip;     // rip
+  u64 cs;
+  u64 eflags;  // rflags
+  u64 rsp;     // rsp
+  u64 ds;      // ss
+}Trapframe;
+
 // x86-64 specific cap types
 struct _FrameCap {
   // The ASID doubles as the PCI bus/dev/fun when used in an IOMMU context
@@ -102,7 +129,7 @@ typedef struct _Pml4Cap {
   u64       capPML4IsMapped : 1;
   u64 : 46;
   u64       capPML4MappedASID : 12;
-};
+}Pml4Cap;
 
 // PML4, PDPE, PDs and PTs, assuming 51-bit physical address
 

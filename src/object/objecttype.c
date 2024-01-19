@@ -18,6 +18,7 @@
 #include <machine.h>
 #include <util.h>
 #include <string.h>
+#include <os/objecttype.h>
 
 u64 get_object_size(u64 objectType, u64 userObjectSize) {
     // arch_get_object_size
@@ -39,7 +40,7 @@ u64 get_object_size(u64 objectType, u64 userObjectSize) {
     }
 }
 
-Cap create_object(u64 objectType, void* regionBase, u64 userSize, bool deviceMemory) {
+Cap create_object(api_object objectType, void* regionBase, u64 userSize, bool deviceMemory) {
     // wait to implement the function arch_create_object
     /*
     // Handle architecture-specific objects.
@@ -52,7 +53,7 @@ Cap create_object(u64 objectType, void* regionBase, u64 userSize, bool deviceMem
         Tcb* tcb;
         tcb = TCB_PTR((u64)regionBase + TCB_OFFSET);
 
-        tcb->tcbTimeSlice = CONFIG_TIME_SLICE;
+        tcb->tcbTimeSlice = 0;
         // tcbDomain
         ThreadCap threadCap;
         threadCap.capType = cap_thread_cap;
@@ -121,7 +122,7 @@ void create_new_object(u64 objectType, Cte* parent,
         insert_new_cap(parent, &destCNode[destOffset + i], cap);
     }
 }
-
+/*
 u64 CONST cap_get_cap_size_bits(Cap cap) {
     CapTag cTag;
 
@@ -201,3 +202,4 @@ bool CONST is_cap_revocable(Cap derivedCap, Cap srcCap) {
         return false;
     }
 }
+*/

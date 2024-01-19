@@ -48,7 +48,7 @@ void ipc_test(void) {
   // Allocate caps by root_task (need capdl).
   // Create endpoint and endpointcap.
   Endpoint* endpointTest = memblock_alloc_kernel(PGSIZE, PGSIZE);
-  Cap capTest = create_object(osEndpointObject, endpointTest, 0, 0);
+  Cap capTest = create_object(osEndpointObject, endpointTest, 0ul, false);
 
   // Insert cap to the cspace.
   insert_new_cap(cteRoot,

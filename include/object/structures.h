@@ -5,6 +5,7 @@
 #include <os/os_arch/constants.h>
 #include <os/constants.h>
 #include <arch/object/structures.h>
+#include <mode/object/structures.h>
 
 #define wordRadix 6
 #define CTE_PTR(r) ((Cte *)(r))
@@ -316,15 +317,15 @@ struct _Tcb {
 
   LookupFault tcbLookupFailure;
 
-  //Dom tcbDomain;
+  Trapframe* tf;
 
-  //Prio tcbMcp;
+  u64 tcbMcp;
 
-  //Prio tcbPriority;
+  u64 tcbPriority;
 
-  //u64 tcbTimeSlice;
+  u64 tcbTimeSlice;
 
-  //Cptr tcbFaultHandler;
+  u64 tcbFaultHandler;
 
   u64 tcbIPCBuffer;
 

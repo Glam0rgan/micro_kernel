@@ -2,7 +2,7 @@
 
 #include <os/macros.h>
 
-#include <os/Osarch/simple_types.h>
+#include <os/os_arch/simple_types.h>
 
 #if defined(OsINT64_IS_LONG)
 #define _Osint64_type    long int

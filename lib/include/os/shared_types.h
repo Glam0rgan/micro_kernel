@@ -2,7 +2,7 @@
 
 typedef struct OsIPCBuffer_ {
     OsMessageInfo tag;
-    OsWord msg[OS_MsgMaxLength];
+    OsWord msg[Os_MsgMaxLength];
     OsWord userData;
     OsWord caps_or_badges[Os_MsgMaxExtraCaps];
     OsCPtr receiveCNode;

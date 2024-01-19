@@ -1,5 +1,4 @@
 #include <arch/machine/registerset.h>
-#include <machine/fpu.h>
 #include <arch/object/structures.h>
 
 void mode_init_context(UserContext* context) {
