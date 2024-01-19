@@ -5,15 +5,8 @@ This is a micro-kernel implementation entirely depends on os.
 - [os-manual](https://os.systems/Info/Docs/os-manual-latest.pdf "os-manual")
 
 ## TODOs
-- [X] fix structers with bitfield
-- [X] implement the send_api and reveive api
-- [X] implement the cspace
-- [ ] implement the notification
-- [ ] implement the cnode
-- [ ] implement the interrupts
-- [ ] implement the untyped
-- [ ] mix the code with mmu
-- [ ] implement the smp
-- [ ] arch
-- [ ] arrange the files
-- [ ] libs
+- [ ] fix bug
+- [ ] trap
+- [ ] makefile
+- [ ] fix bug for compling
+- [ ] endpoint test
