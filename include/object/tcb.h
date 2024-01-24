@@ -28,3 +28,5 @@ u64 copyMRs(Tcb* sender, u64* sendBuf, Tcb* receiver,
 CPtr PURE get_extra_cptr(u64* bufferPtr, u64 i);
 
 void set_extra_badge(u64* bufferPtr, u64 badge, u64 i);
+
+Exception lookup_extra_caps(Tcb* thread, u64* bufferPtr, OsMessageInfo info);

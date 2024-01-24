@@ -9,6 +9,6 @@ void main(void) {
     msg.length = 1;
     OsWord id = 155;
     os_set_mr(0, id);
-    printf("send the word %l", id);
+    //printf("send the word %l", id);
     send(0, msg);
 }

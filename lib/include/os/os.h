@@ -1,5 +1,4 @@
 #pragma once
-#include <include/types.h>
-#include <defs.h>
-#include <function.h>
+#include <types.h>
+#include <os/function.h>
 #include <user.h>

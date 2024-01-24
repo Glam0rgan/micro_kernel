@@ -1,7 +1,7 @@
 #pragma once
 
-#include <api/types.h>
 #include <stdint.h>
+#include <api/types.h>
 #include <os/os_arch/constants.h>
 #include <os/constants.h>
 #include <arch/object/structures.h>
@@ -237,43 +237,56 @@ enum OsFaultType {
   VMFault = 4
 };
 
-enum LookupFault {
+enum LookupFaultType {
   invalidRoot = 0,
   missingCapability,
   depthMismatch,
   guardMismatch
 };
 
+typedef struct LookupFault_t{
+  enum LookupFaultType type;
+  enum LookupFaultType lufType;
+  u64  bitsRemaining;
+}LookupFault;
+
 // Fault: size = 16 bytes
-typedef struct _NullFault {
+struct _NullFault {
   u64 padding;
 
   u64 : 60;
   u64 osFaultType : 4;
-}NullFault;
+};
 
-typedef struct _CapFault {
+struct _CapFault {
   u64 address;
 
   u64 inReceivePhase : 1;
   u64 : 59;
   u64 osFaultType : 4;
-}CapFault;
+};
 
-typedef struct _UnknownSyscall {
+struct _UnknownSyscall {
   u64 syscallNumber;
 
   u64 : 60;
   u64 osFaultType : 4;
-}UnknowSyscall;
+};
 
-typedef struct _UserException {
+struct _UserException {
   u64 padding;
 
   u64 number : 32;
   u64 code : 28;
   u64 osFaultType : 4;
-}UserException;
+};
+
+typedef struct _OsFault{
+  u64 num;
+  
+  u64 padding : 60;
+  u64 osFaultType : 4;
+}OsFault;
 
 // Thread state size = 24 bytes
 typedef struct __ThreadState {
@@ -296,13 +309,6 @@ typedef struct _Cap {
   u64 left : 59;
 }Cap;
 
-typedef struct _OsMessageInfo {
-  u64 label : 52;
-  u64 capsUnwrapped : 3;
-  u64 extraCaps : 2;
-  u64 length : 7;
-}OsMessageInfo;
-
 // Thread control block
 struct _Tcb {
   // arch specific tcb state
@@ -313,7 +319,7 @@ struct _Tcb {
 
   Notification* tcbBoundNotification;
 
-  OsFaultType tcbFault;
+  OsFault tcbFault;
 
   LookupFault tcbLookupFailure;
 
@@ -344,7 +350,7 @@ typedef struct _IpcBuffer {
   u64 receiveCNode;
   u64 receiveIndex;
   u64 receiveDepth;
-}IpcBuffer __attribute__((__aligned__(sizeof(struct IpcBuffer_))));
+}IpcBuffer __attribute__((__aligned__(sizeof(struct _IpcBuffer))));
 
 enum EndpointState {
   EPState_Idle = 0,

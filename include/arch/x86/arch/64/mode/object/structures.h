@@ -1,8 +1,11 @@
 #pragma once
 
 #include <os/macros.h>
+#ifndef u64
 
-typedef Pml4e VspaceRoot;
+#define u64 uint64_t
+
+#endif
 
 #define PML4E_PTR(r)     ((Pml4e *)(r))
 #define PML4E_PTR_PTR(r) ((Pml4e **)(r))
@@ -203,3 +206,5 @@ typedef struct _Cr3 {
   u64 pml4BaseAddress : 39;
   u64       pcid : 12;
 }Cr3;
+
+typedef Pml4e VspaceRoot;

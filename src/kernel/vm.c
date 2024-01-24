@@ -3,7 +3,7 @@
 #include <mmu.h>
 #include <memlayout.h>
 #include <vm.h>
-#include <tcb.h>
+#include <object/tcb.h>
 
 #define kernelFirstSize 0x4000000
 #define KernelFirstHasMappedEnd  0xFFFFFFFF84000000

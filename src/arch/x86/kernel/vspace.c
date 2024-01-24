@@ -1,8 +1,7 @@
 #include <types.h>
-#include <ctypes.h>
 #include <util.h>
-#include <structures.h>
-#include <vspace.h>
+#include <object/structures.h>
+#include <kernel/vspace.h>
 #include <constants.h>
 // Use tcb to get 
 u64* PURE lookup_ipc_buffer(bool_t isReceiver, tcb_t* thread) {

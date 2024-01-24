@@ -1,4 +1,6 @@
 #pragma once
+#include <mode_include/64/os/shared_types.h>
+
 
 typedef struct OsIPCBuffer_ {
     OsMessageInfo tag;

@@ -2,6 +2,7 @@ struct list_head;
 struct proc;
 u64 kernelHasMappedEnd;
 u64 kernelSize;
+extern volatile u32*  lapic;
 
 // console.c
 void            cprintf(char* fmt, ...);
@@ -19,7 +20,7 @@ u64             memblock_alloc_kernel(u64 size, u64 align);
 // proc.c
 void            test(void);
 void            send(OsCPtr dest, OsMessageInfo msgInfo);
-void            reply(OsMessageInfo msgInfo);
+void            receive(OsCPtr dest,OsMessageInfo* msgInfo);
 
 // string.c
 int             memcmp(const void*, const void*, u32);

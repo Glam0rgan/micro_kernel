@@ -9,4 +9,4 @@ typedef enum api_object {
     osNonArchObjectTypeCount,
 }OSObjectType;
 
-typedef OsU64 ApiObject;
+typedef uint64_t ApiObject;

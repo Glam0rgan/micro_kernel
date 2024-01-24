@@ -1,40 +1,19 @@
-/* entry64.S 
- *
- * Copyright (c) 2013 Brian Swetland
- * 
- * Permission is hereby granted, free of charge, to any person obtaining
- * a copy of this software and associated documentation files (the
- * "Software"), to deal in the Software without restriction, including
- * without limitation the rights to use, copy, modify, merge, publish,
- * distribute, sublicense, and/or sell copies of the Software, and to
- * permit persons to whom the Software is furnished to do so, subject to
- * the following conditions:
- *
- * The above copyright notice and this permission notice shall be
- * included in all copies or substantial portions of the Software.
- * 
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
- * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
- * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
- * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
- * LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
- * OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
- * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- *
- */
-
-#define mboot_magic 0x1badb002
-#define mboot_flags 0x00010000
-
+# 0 "src/kernel/entry64.S"
+# 0 "<built-in>"
+# 0 "<command-line>"
+# 1 "/usr/include/stdc-predef.h" 1 3 4
+# 0 "<command-line>" 2
+# 1 "src/kernel/entry64.S"
+# 29 "src/kernel/entry64.S"
 .code32
 .global mboot_header
 .global mboot_entry
 
 mboot_header:
-  .long mboot_magic
-  .long mboot_flags
-  .long (-mboot_magic -mboot_flags)	# checksum
-  .long mboot_load_addr			# header_addr
+  .long 0x1badb002
+  .long 0x00010000
+  .long (-0x1badb002 -0x00010000) # checksum
+  .long mboot_load_addr # header_addr
   .long mboot_load_addr
   .long mboot_load_end
   .long mboot_bss_end
@@ -164,10 +143,9 @@ entry64mp:
 
 .global wrmsr
 wrmsr:
-  mov %rdi, %rcx     # arg0 -> msrnum
-  mov %rsi, %rax     # val.low -> eax
+  mov %rdi, %rcx # arg0 -> msrnum
+  mov %rsi, %rax # val.low -> eax
   shr $32, %rsi
-  mov %rsi, %rdx     # val.high -> edx
+  mov %rsi, %rdx # val.high -> edx
   wrmsr
   retq
-

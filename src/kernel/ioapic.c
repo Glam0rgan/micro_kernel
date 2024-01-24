@@ -20,6 +20,8 @@
 #define INT_LOGICAL    0x00000800  // Destination is CPU id (vs APIC ID)
 
 volatile struct Ioapic* ioapic;
+int ismp = 0;
+u8  ioapicid;
 
 // IO APIC MMIO structure: write reg, then read or write data.
 struct Ioapic {
@@ -45,8 +47,8 @@ void ioapic_init(void) {
         return;
 
     ioapic = (volatile struct ioapic*)IO2V(IOAPIC);
-    maxintr = (ioapicread(REG_VER) >> 16) & 0xFF;
-    id = ioapicread(REG_ID) >> 24;
+    maxintr = (ioapic_read(REG_VER) >> 16) & 0xFF;
+    id = ioapic_read(REG_ID) >> 24;
     if (id != ioapicid)
         cprintf("ioapicinit: id isn't equal to ioapicid; not a MP\n");
 

@@ -1,11 +1,11 @@
-#include "types.h"
-#include "defs.h"
-#include "mmu.h"
-#include "memlayout.h"
-#include "proc.h"
-#include <objecttype.h>
-#include <cspace.h>
-#include <structures.h>
+#include <types.h>
+#include <kernel/defs.h>
+#include <kernel/mmu.h>
+#include <kernel/memlayout.h>
+#include <kernel/proc.h>
+#include <object/objecttype.h>
+#include <kernel/cspace.h>
+#include <object/structures.h>
 
 void ipc_test(void) {
 

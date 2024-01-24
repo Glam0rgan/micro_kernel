@@ -1,14 +1,29 @@
-#include <syscall.h>
-#include <traps.h>
+#include <kernel/syscall.h>
+#include <kernel/traps.h>
 
-#define SYSCALL(name) \
-  .globl name; \
-  name: \
-    movl $SYS_ ## name, %eax; \
-    int $T_SYSCALL; \
-    ret
+.globl send;
+send:
+  movl $2, %eax;
+  int $T_SYSCALL;
+  ret
+.globl receive;
+receive:
+  movl $3, %eax;
+  int $T_SYSCALL;
+  ret
+.globl test;
+test:
+  movl $1, %eax;
+  int $T_SYSCALL;
+  ret
+.globl print;
+print:
+  movl $4, %eax;
+  int $T_SYSCALL;
+  ret
 
-SYSCALL(send)
-SYSCALL(receive)
-SYSCALL(test)
-SYSCALL(print)
+
+
+
+  
+

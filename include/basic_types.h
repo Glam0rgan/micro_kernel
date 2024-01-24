@@ -21,7 +21,6 @@ typedef uint8_t Osu8;
 typedef uint16_t Osu16;
 typedef uint32_t Osu32;
 
-typedef CPtr OsCPtr;
 typedef NodeId OsNodeId;
 typedef PAddr OsPAddr;
 typedef Dom OsDomain;

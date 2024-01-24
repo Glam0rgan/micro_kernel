@@ -7,4 +7,4 @@ enum AsidConstans {
     asidInvalid = 0
 };
 
-typedef u64 Asid;
+typedef uint64_t Asid;

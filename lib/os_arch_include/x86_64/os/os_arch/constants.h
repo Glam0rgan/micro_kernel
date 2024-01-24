@@ -1,3 +1,5 @@
+#pragma once
+
 /* for x86-64, the large page size is 2 MiB and huge page size is 1 GiB */
 #define OsWordBits           64
 #define OsWordSizeBits       3

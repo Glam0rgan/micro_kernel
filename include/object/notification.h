@@ -14,5 +14,5 @@ void unbind_maybe_notification(Notification* ntfnPtr);
 
 static inline void ntfn_set_active(Notification* ntfnPtr, u64 badge) {
     ntfnPtr->state = NtfnState_Active;
-    ntfnPtr->ntfnMsgIdentifier(ntfnPtr, badge);
+    ntfnPtr->ntfnMsgIdentifier = badge;
 }

@@ -1,4 +1,4 @@
-
+#pragma once
 /* These are the indices of the registers in the
  * saved thread context. The values are determined
  * by the order in which they're saved in the trap
@@ -14,7 +14,7 @@
   * and sysenter have to do some juggling to make
   * things work */
 
-enum Register {
+;enum Register {
   // User registers that will be preserved during syscall
   // Deliberately place the cap and badge registers early
   // So that when popping on the fastpath we can just not
