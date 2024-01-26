@@ -217,4 +217,5 @@ typedef struct _Cr3 {
   u64       pcid : 12;
 }Cr3;
 
-typedef Pml4e VSpaceRoot;
+
+typedef Pml4e VspaceRoot;
