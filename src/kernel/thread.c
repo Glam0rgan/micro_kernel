@@ -13,15 +13,12 @@
 
 extern ExtraCaps currentExtraCaps;
 
-<<<<<<< HEAD
 TcbQueue ksReadyQueues;
 Tcb* ksCurThread;
 
 Tcb* ksSchedulerAction;
 __thread OsIPCBuffer* __osIPCBuffer;
 
-=======
->>>>>>> 70d977d7b6eff0b6ec4fa66b9fac00dae34b08af
 // Like getReceiveSlots, this is specialised for single-cap transfer.
 static OsMessageInfo transfer_caps(OsMessageInfo info,
   Endpoint* endpoint, Tcb* receiver, u64* receiveBuffer) {
