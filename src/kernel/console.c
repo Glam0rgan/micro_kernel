@@ -25,10 +25,10 @@ static int panicked = 0;
 static char digits[] = "0123456789abcdef";
 
 static void
-printptr(u64p x) {
+printptr(u64 x) {
   int i;
-  for (i = 0; i < (sizeof(u64p) * 2); i++, x <<= 4)
-    consputc(digits[x >> (sizeof(u64p) * 8 - 4)]);
+  for (i = 0; i < (sizeof(u64) * 2); i++, x <<= 4)
+    consputc(digits[x >> (sizeof(u64) * 8 - 4)]);
 }
 
 static void
@@ -113,7 +113,7 @@ cprintf(char* fmt, ...) {
       printlong(va_arg(ap, u64), 16, 0);
       break;
     case 'p':
-      printptr(va_arg(ap, u64p));
+      printptr(va_arg(ap, u64));
       break;
     case 's':
       if ((s = va_arg(ap, char*)) == 0)

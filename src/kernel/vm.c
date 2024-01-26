@@ -1,12 +1,15 @@
 #include <types.h>
-#include <defs.h>
-#include <mmu.h>
-#include <memlayout.h>
-#include <vm.h>
-#include <tcb.h>
+#include <kernel/defs.h>
+#include <kernel/mmu.h>
+#include <kernel/memlayout.h>
+#include <kernel/vm.h>
+#include <object/tcb.h>
 
 #define kernelFirstSize 0x4000000
 #define KernelFirstHasMappedEnd  0xFFFFFFFF84000000
+
+u64 kernelHasMappedEnd;
+u64 kernelSize;
 
 static u64* kernPml4;
 static u64* kernPdpt;

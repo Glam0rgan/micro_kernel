@@ -1,6 +1,6 @@
 #include <structures.h>
 
-extern __thread IpcBuffer* __OsIpcBuffer;
+__thread IpcBuffer* __OsIpcBuffer;
 
 IpcBuffer* Osget_ipc_buffer(void) {
   return __OsIpcBuffer;

@@ -1,11 +1,11 @@
 #include <types.h>
-#include <failures.h>
-#include <structures.h>
+#include <api/failures.h>
+#include <object/structures.h>
 #include <util.h>
-#include <tcb.h>
+#include <object/tcb.h>
 #include <arch/x86/arch/64/mode/machine/registerset.h>
 #include <model/statedata.h>
-#include <cspace.h>
+#include <kernel/cspace.h>
 
 ExtraCaps currentExtraCaps;
 

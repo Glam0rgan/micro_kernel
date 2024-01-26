@@ -19,7 +19,7 @@ static inline TcbQueue PURE ntfn_ptr_get_queue(Notification* ntfnPtr) {
 
 static inline void ntfn_ptr_set_queue(Notification* ntfnPtr, TcbQueue ntfnQueue) {
     ntfnPtr->ntfnQueueHead = (u64)ntfnQueue.head;
-    ntfnPtr->ntfnQueueTail = (u64)ntfnQueue.Tail;
+    ntfnPtr->ntfnQueueTail = (u64)ntfnQueue.end;
 }
 
 void send_signal(Notification* ntfnPtr, u64 badge) {
@@ -28,11 +28,11 @@ void send_signal(Notification* ntfnPtr, u64 badge) {
         Tcb* tcb = (Tcb*)ntfnPtr->ntfnBoundTCB;
         // Check if we are bound and that thread is waiting for a message.
         if(tcb) {
-            if(&tcb->tcbState.tsType == ThreadState_BlockedOnReceive) {
+            if(tcb->tcbState.tsType == ThreadState_BlockedOnReceive) {
                 // Send and start thread running.
                 cancel_ipc(tcb);
-                tcb->tcbState = ThreadState_Running;
-                setRegister(tcb, badgeRegister, badge);
+                tcb->tcbState.tsType = ThreadState_Running;
+                set_register(tcb, badgeRegister, badge);
                 possible_switch_to(tcb);
             }
         } else {
@@ -48,7 +48,7 @@ void send_signal(Notification* ntfnPtr, u64 badge) {
         }
     }
     case NtfnState_Waiting: {
-        TcbQueue nftnQueue;
+        TcbQueue ntfnQueue;
         Tcb* dest;
 
         ntfnQueue = ntfn_ptr_get_queue(ntfnPtr);
@@ -59,14 +59,14 @@ void send_signal(Notification* ntfnPtr, u64 badge) {
 
         // Dequeue TCB.
         ntfnQueue = tcb_ep_dequeue(dest, ntfnQueue);
-        ntfn_ptr_set_queue(ntfnPte, ntfnQueue);
+        ntfn_ptr_set_queue(ntfnPtr, ntfnQueue);
 
         // Set he thread state to idle if the queue is empty.
         if(!ntfnQueue.head) {
             ntfnPtr->state = NtfnState_Idle;
         }
 
-        set_thread_state(dest, ThreadState_Running);
+	dest->tcbState.tsType = ThreadState_Running;
         set_register(dest, badgeRegister, badge);
         possible_switch_to(dest);
         break;
@@ -86,8 +86,8 @@ void send_signal(Notification* ntfnPtr, u64 badge) {
 void receive_signal(Tcb* thread, Cap cap, bool isBlocking) {
     Notification* ntfnPtr;
 
-    NotificationCap notifactionCap = *(NotificationCap*)(&cap);
-    ntfnPtr = NTFN_PTR(notificationCap);
+    NotificationCap notificationCap = *(NotificationCap*)(&cap);
+    ntfnPtr = NTFN_PTR(notificationCap.capNtfnPtr);
 
     switch(ntfnPtr->state) {
     case NtfnState_Idle:
@@ -96,18 +96,18 @@ void receive_signal(Tcb* thread, Cap cap, bool isBlocking) {
 
         if(isBlocking) {
             // Block thread on notification object.
-            &thread->tcbState.tsType = ThreadState_BlockedOnNotification;
-            &thread->tcbState.blockingObject = NTFN_REF(ntfnPtr);
+            thread->tcbState.tsType = ThreadState_BlockedOnNotification;
+            thread->tcbState.blockingObject = NTFN_REF(ntfnPtr);
             schedule_tcb(thread);
 
             // Enqueue TCB.
             ntfnQueue = ntfn_ptr_get_queue(ntfnPtr);
             ntfnQueue = tcb_ep_append(thread, ntfnQueue);
 
-            ntfnPtr.state = NtfnState_Waiting;
-            ntfn_ptr_set_queue(ntfnQueue);
+            ntfnPtr->state = NtfnState_Waiting;
+            ntfn_ptr_set_queue(ntfnPtr,ntfnQueue);
         } else {
-            do_nbrecv_failed_transfer(thread);
+            //do_nbrecv_failed_transfer(thread);
         }
         break;
     }
@@ -140,7 +140,7 @@ void cancel_allSignals(Notification* ntfnPtr) {
 
         // Set all waiting threads to Restart.
         for(;thread;thread = thread->tcbEPNext) {
-            set_thread_state(thread, ThreadState_Restart);
+            thread->tcbState.tsType = ThreadState_Restart;
             // Add thread to scheduler queue.
             SCHED_ENQUEUE(thread);
         }
@@ -165,13 +165,13 @@ void cancel_signal(Tcb* threadPtr, Notification* ntfnPtr) {
     }
 
     // Make thread inactive.
-    setThreadState(threadPtr, ThreadState_Inactive);
+    set_threadState(threadPtr, ThreadState_Inactive);
 }
 
 // Clear ntfnBoundTCB and tcbBoundNotification.
 static inline void do_unbind_notification(Notification* ntfnPtr, Tcb* tcbptr) {
     ntfnPtr->ntfnBoundTCB = (u64)0;
-    tcbptr->tcbBoundNotification = NuLL;
+    tcbptr->tcbBoundNotification = NULL;
 }
 
 // Use notification pointer to unbind.

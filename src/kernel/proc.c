@@ -1,12 +1,13 @@
+#include <types.h>
 #include <proc.h>
 #include <defs.h>
 #include <x86.h>
-#include <types.h>
 #include <memlayout.h>
 #include <mmu.h>
 #include <model/statedata.h>
 #include <objecttype.h>
 #include <cspace.h>
+#include <object/endpoint.h>
 
 void test() {
   panic("test!!!");
@@ -25,6 +26,6 @@ void receive(OsCPtr dest, OsMessageInfo* msgInfo) {
   receive_ipc(ksCurThread, cte->cap, 1);
 }
 
-void printf(char* fmt, ...) {
+void print(char* fmt, ...) {
 
 }

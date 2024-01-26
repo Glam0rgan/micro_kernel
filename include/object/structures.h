@@ -1,16 +1,22 @@
 #pragma once
 
-#include <api/types.h>
 #include <stdint.h>
+#include <api/types.h>
 #include <os/os_arch/constants.h>
 #include <os/constants.h>
 #include <arch/object/structures.h>
 #include <mode/object/structures.h>
 
 #define wordRadix 6
+
+#define NTFN_PTR(r) ((Notification *)(r))
+#define NTFN_REF(p) ((u64)(p))
+
 #define CTE_PTR(r) ((Cte *)(r))
 #define CTE_REF(p) ((u64)(p))
+
 #define EP_PTR(r) ((Endpoint *)(r))
+#define EP_REF(r) ((u64)(r))
 
 // We would like the actual 'tcb' region (the portion that contains the tcb_t) of the tcb
 // to be as large as possible, but it still needs to be aligned. As the TCB object contains
@@ -28,11 +34,17 @@
 // a = tcbCNodeEntries * sizeof(cte_t)
 // b = BIT(TCB_SIZE_BITS)
 // c = BIT(OsTCBBits)
+
+#define TCB_PTR(r)       ((Tcb *)(r))
+#define TCB_CTE_PTR(r,i) (((Cte *)(r))+(i))
+#define TCB_REF(p)       ((u64)(p))
+
 // Generate a cte_t pointer from a tcb_t pointer
 #define TCB_PTR_CTE_PTR(p,i)\
   (((Cte *)((u64)(p)&~MASK(OsTCBBits)))+(i))
 
 #define TCB_SIZE_BITS (OsTCBBits - 1)
+#define TCB_OFFSET    BIT(TCB_SIZE_BITS)
 
 typedef u64 OsCapRights;
 
@@ -57,7 +69,7 @@ enum TcbCNodeIndex {
   tcbCTable = 0,
 
   // VSpace root
-  tcbVtable = 1,
+  tcbVTable = 1,
 
   // Reply cap slot
   tcbReply = 2,
@@ -237,43 +249,56 @@ enum OsFaultType {
   VMFault = 4
 };
 
-enum LookupFault {
+enum LookupFaultType {
   invalidRoot = 0,
   missingCapability,
   depthMismatch,
   guardMismatch
 };
 
+typedef struct LookupFault_t{
+  enum LookupFaultType type;
+  enum LookupFaultType lufType;
+  u64  bitsRemaining;
+}LookupFault;
+
 // Fault: size = 16 bytes
-typedef struct _NullFault {
+struct _NullFault {
   u64 padding;
 
   u64 : 60;
   u64 osFaultType : 4;
-}NullFault;
+};
 
-typedef struct _CapFault {
+struct _CapFault {
   u64 address;
 
   u64 inReceivePhase : 1;
   u64 : 59;
   u64 osFaultType : 4;
-}CapFault;
+};
 
-typedef struct _UnknownSyscall {
+struct _UnknownSyscall {
   u64 syscallNumber;
 
   u64 : 60;
   u64 osFaultType : 4;
-}UnknowSyscall;
+};
 
-typedef struct _UserException {
+struct _UserException {
   u64 padding;
 
   u64 number : 32;
   u64 code : 28;
   u64 osFaultType : 4;
-}UserException;
+};
+
+typedef struct _OsFault{
+  u64 num;
+  
+  u64 padding : 60;
+  u64 osFaultType : 4;
+}OsFault;
 
 // Thread state size = 24 bytes
 typedef struct __ThreadState {
@@ -296,13 +321,6 @@ typedef struct _Cap {
   u64 left : 59;
 }Cap;
 
-typedef struct _OsMessageInfo {
-  u64 label : 52;
-  u64 capsUnwrapped : 3;
-  u64 extraCaps : 2;
-  u64 length : 7;
-}OsMessageInfo;
-
 // Thread control block
 struct _Tcb {
   // arch specific tcb state
@@ -313,7 +331,7 @@ struct _Tcb {
 
   Notification* tcbBoundNotification;
 
-  OsFaultType tcbFault;
+  OsFault tcbFault;
 
   LookupFault tcbLookupFailure;
 
@@ -344,7 +362,7 @@ typedef struct _IpcBuffer {
   u64 receiveCNode;
   u64 receiveIndex;
   u64 receiveDepth;
-}IpcBuffer __attribute__((__aligned__(sizeof(struct IpcBuffer_))));
+}IpcBuffer __attribute__((__aligned__(sizeof(struct _IpcBuffer))));
 
 enum EndpointState {
   EPState_Idle = 0,

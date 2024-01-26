@@ -5,7 +5,8 @@
 #include <object/structures.h>
 #include <arch/machine.h>
 
-Tcb* ksSchedulerAction;
+extern Tcb* ksSchedulerAction;
+extern __thread OsIPCBuffer* __osIPCBuffer;
 
 /*
 static inline CONST u64 ready_queues_index(u64 dom, u64 prio) {
@@ -19,15 +20,17 @@ static inline CONST u64 ready_queues_index(u64 dom, u64 prio) {
 }
 */
 
+void arch_switch_to_thread(Tcb* tcb);
+
 void schedule_tcb(Tcb* tptr);
 
-void set_thread_state(Tcb* tptr, _ThreadState ts);
+void set_thread_state(Tcb* tptr, enum _ThreadState ts);
 
 void possible_switch_to(Tcb* tptr);
 void reschedule_required(void);
 void schedule(void);
 
-void do_ipc_transfer(Tcb* sender, Endpoint endpoint,
+void do_ipc_transfer(Tcb* sender, Endpoint* endpoint,
     u64 badge, bool grant, Tcb* reveiver);
 void do_normal_transfer(Tcb* sender, u64* sendBuffer, Endpoint* endpoint,
     u64 badge, bool canGrant, Tcb* receiver,
@@ -35,7 +38,7 @@ void do_normal_transfer(Tcb* sender, u64* sendBuffer, Endpoint* endpoint,
 void do_fault_transfer(u64 badge, Tcb* sender, Tcb* reveiver,
     u64* reveiverIPCBuffer);
 
-void set_threadState(Tcb* tptr, _ThreadState ts);
+void set_threadState(Tcb* tptr, enum _ThreadState ts);
 void choose_thread(void);
 
 static inline bool PURE is_runnable(const Tcb* thread) {
@@ -73,4 +76,4 @@ static inline bool PURE is_blocking(const Tcb* thread) {
     }
 }
 
-#define isSchedulable isRunnable
+#define isSchedulable is_runnable

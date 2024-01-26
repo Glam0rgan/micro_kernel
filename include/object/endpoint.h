@@ -1,6 +1,8 @@
 #pragma once
 
+#include <util.h>
 #include <types.h>
+#include <object/tcb.h>
 #include <object/structures.h>
 
 // Use endpoint pointer get the thread queue.
@@ -24,4 +26,6 @@ void send_ipc(bool blocking, bool doCall, u64 badge,
   bool canGrant, bool canGrantReply, Tcb* thread,
   Endpoint* epptr);
 
-void cancel_ipc(Tcb* tptr);
+void receive_ipc(Tcb* thread, Cap cap, bool isBlocking);
+
+void cancel_ipc(Tcb* tcb);

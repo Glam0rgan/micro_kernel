@@ -26,7 +26,7 @@ void wait_disk(void) {
 // Read a single sector at offset into dst.
 void read_sect(void* dst, u32 offset) {
     // Issue command.
-    waitdisk();
+    wait_disk();
     outb(0x1F2, 1);   // count = 1
     outb(0x1F3, offset);
     outb(0x1F4, offset >> 8);
@@ -35,7 +35,7 @@ void read_sect(void* dst, u32 offset) {
     outb(0x1F7, 0x20);  // cmd 0x20 - read sectors
 
     // Read data.
-    waitdisk();
+    wait_disk();
     insl(0x1F0, dst, SECTSIZE / 4);
 }
 
@@ -67,10 +67,9 @@ int load_plugin(char*** argv) {
     // ??? 3+MAXARG+1
     u64 argc, uStack[3 + MAXARG + 1];
     u32* pluginElf;
-    ProgHdr progHdr;
+    struct ProgHdr progHdr;
     int cnt, off;
     u64 size, stackPoint;
-    u64 argc;
 
     for(int i = 0;i < pluginNum;++i) {
         size = 0;
@@ -85,7 +84,7 @@ int load_plugin(char*** argv) {
         // Load program into memory.
         read_seg((u8*)pluginElf, (elf.phoff + elf.phnum * sizeof(progHdr)), pluginSector);
         for(cnt = 0, off = elf.phoff; cnt < elf.phnum;i++, off += sizeof(progHdr)) {
-            progHdr = *(ProgHdr*)(pluginElf + off / 4);
+            progHdr = *(struct ProgHdr*)(pluginElf + off / 4);
             if(progHdr.type != ELF_PROG_LOAD)
                 continue;
 
@@ -112,15 +111,15 @@ int load_plugin(char*** argv) {
         uStack[1] = argc;
         uStack[2] = stackPoint - (argc + 1) * sizeof(u64); //argv pointer
 
-        proc->tf->rdi = argc;
-        proc->tf->rsi = ;
+        //proc->tf->rdi = argc;
+        //proc->tf->rsi = ;
 
         stackPoint -= (3 + argc + 1) * sizeof(u64);
         copy_uvm(pml4, stackPoint, uStack, (3 + argc + 1) * sizeof(u64));
 
-        proc->pml4 = pml4;
-        proc->size = size;
-        proc->tf->rip = elf.entry;
-        proc->tf->rsp = stackPoint;
+        //proc->pml4 = pml4;
+        //proc->size = size;
+        //proc->tf->rip = elf.entry;
+        //proc->tf->rsp = stackPoint;
     }
 }

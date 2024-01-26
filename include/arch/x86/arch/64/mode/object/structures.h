@@ -1,8 +1,21 @@
 #pragma once
 
 #include <os/macros.h>
+#ifndef u64
 
-typedef Pml4e VspaceRoot;
+#define u64 uint64_t
+
+#endif
+
+#define GDT_NULL    0
+#define GDT_CS_0    1
+#define GDT_DS_0    2
+#define GDT_TSS     3 //TSS is two slots in x86-64
+#define GDT_CS_3    5
+#define GDT_DS_3    6
+#define GDT_FS      7
+#define GDT_GS      8
+#define GDT_ENTRIES 9
 
 #define PML4E_PTR(r)     ((Pml4e *)(r))
 #define PML4E_PTR_PTR(r) ((Pml4e **)(r))
@@ -203,3 +216,5 @@ typedef struct _Cr3 {
   u64 pml4BaseAddress : 39;
   u64       pcid : 12;
 }Cr3;
+
+typedef Pml4e VSpaceRoot;

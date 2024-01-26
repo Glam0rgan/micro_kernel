@@ -40,7 +40,7 @@ u64 get_object_size(u64 objectType, u64 userObjectSize) {
     }
 }
 
-Cap create_object(api_object objectType, void* regionBase, u64 userSize, bool deviceMemory) {
+Cap create_object(ApiObject objectType, void* regionBase, u64 userSize, bool deviceMemory) {
     // wait to implement the function arch_create_object
     /*
     // Handle architecture-specific objects.
@@ -101,7 +101,7 @@ Cap create_object(api_object objectType, void* regionBase, u64 userSize, bool de
     default: {
         panic("createobjectdefault");
     }
-    }
+  }
 }
 
 void create_new_object(u64 objectType, Cte* parent,

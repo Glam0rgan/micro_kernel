@@ -4,49 +4,50 @@
 #include <util.h>
 #include <arch/api/types.h>
 #include <arch/types.h>
+#include <os/types.h>
 #include <os/constants.h>
 
-typedef u64 Prio;
+//typedef uint64_t Prio;
 
-static inline OsMessageInfo CONST messageinfo_from_u64_raw(u64 w) {
+static inline OsMessageInfo CONST messageinfo_from_u64_raw(uint64_t w) {
   OsMessageInfo mi;
 
-  mi = (OsMessageInfo)w;
+  mi = *(OsMessageInfo*)(&w);
   return mi;
 }
 
-static inline OsMessageInfo CONST messageinfo_from_u64(u64 w) {
+static inline OsMessageInfo CONST messageinfo_from_u64(uint64_t w) {
   OsMessageInfo mi;
-  u64 len;
+  uint64_t len;
 
   // Cast to OsMessageInfo
-  mi = (OsMessageInfo)w;
+  mi = *(OsMessageInfo*)(&w);
 
   // Fix the length.
   len = mi.length;
-  if(len > OsMsgMaxLength) {
-    mi.length = OsMsgMaxLength;
+  if(len > Os_MsgMaxLength) {
+    mi.length = Os_MsgMaxLength;
   }
 
   return mi;
 }
 
-struct _CapTransfer {
-  Cptr ctReceiveRoot;
-  Cptr ctReceiveIndex;
-  u64 ctReceiveDepth;
-};
-typedef struct _CapTranfer CapTransfer;
+typedef struct _CapTransfer {
+  CPtr ctReceiveRoot;
+  CPtr ctReceiveIndex;
+  uint64_t ctReceiveDepth;
+}CapTransfer;
 
-static inline CapTransfer PURE capTransfer_from_u64(u64* wptr) {
+static inline CapTransfer PURE capTransfer_from_u64(uint64_t* wptr)  {
   CapTransfer transfer;
-  transfer.ctReceiveRoot = (Cptr)wptr[0];
-  transfer.ctReceiveIndex = (Cptr)wptr[1];
+  transfer.ctReceiveRoot = (CPtr)wptr[0];
+  transfer.ctReceiveIndex = (CPtr)wptr[1];
   transfer.ctReceiveDepth = wptr[2];
 
   return transfer;
 }
 
-static inline u64 CONST u64_from_messageinfo(OsMessageInfo mi) {
-  return (u64)mi;
+static inline uint64_t CONST u64_from_messageinfo(OsMessageInfo mi) {
+  uint64_t tmp = *(uint64_t*)(&mi);
+  return tmp;
 }

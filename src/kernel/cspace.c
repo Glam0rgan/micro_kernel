@@ -95,8 +95,8 @@ LookupSlotRet lookup_slot_for_cnode_op(bool isSource, Cap root, CPtr capptr, u64
     currentSyscallError.type = OsFailedLookup;
     currentSyscallError.failedLookupWasSource = isSource;
     // Need fix.
-    currentLookupFault.type = Lookup_fault_depth_mismatch;
-    currentLookupFault.bitsRemaning = resRet.bitsRemaining;
+    currentLookupFault.type = depthMismatch;
+    currentLookupFault.bitsRemaining = resRet.bitsRemaining;
     ret.status = EXCEPTION_SYSCALL_ERROR;
     return ret;
   }

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <os/types.h>
+#include <kernel/thread.h>
 
 extern __thread OsIPCBuffer* __osIPCBuffer;
 

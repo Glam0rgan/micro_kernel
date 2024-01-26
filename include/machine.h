@@ -3,11 +3,14 @@
 #include <plat/machine.h>
 #include <machine/registerset.h>
 #include <hardware.h>
+#include <util.h>
+
+#define PPTR_BASE_OFFSET 0x00
 
 /* When obtaining a physical address from a reference to any object in
  * the physical mapping window, this function must be used. */
-static inline Paddr CONST addr_from_pptr(const void* pptr) {
-    return (Paddr)pptr - PPTR_BASE_OFFSET;
+static inline PAddr CONST addr_from_pptr(const void* pptr) {
+    return (PAddr)pptr - PPTR_BASE_OFFSET;
 }
 
 #define paddr_to_pptr(x)   ptr_from_paddr(x)

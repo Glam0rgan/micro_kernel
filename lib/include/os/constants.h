@@ -1,7 +1,8 @@
 #pragma once
 
-#include <os/config.h>
 #include <os/macros.h>
+#include <os/config.h>
+
 
 #ifndef __ASSEMBLER__
 
@@ -12,8 +13,10 @@ enum Os_MsgLimits {
 
 enum {
     Os_MsgMaxLength = 120,
-}
+};
 
-#define Os_MsgMaxExtraCaps (LIB_BIT(Os_MsgExtraCapBits)-1)
 
 #endif
+
+#define LIB_BIT(n)  (1ul<<(n))
+#define Os_MsgMaxExtraCaps (LIB_BIT(Os_MsgExtraCapBits)-1)

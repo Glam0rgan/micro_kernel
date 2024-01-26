@@ -1,3 +1,5 @@
+#pragma once
+
 #define ULLONG_MAX (~0ULL)
 
 #define MEMBLOCK_ALLOC_ACCESSIBLE 0

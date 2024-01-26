@@ -21,6 +21,9 @@
 
 #define PXMASK          0x1FF
 
+#define PGROUNDUP(sz)  (((sz)+((u64)PGSIZE-1)) & ~((u64)(PGSIZE-1)))
+#define PGROUNDDOWN(a) (((a)) & ~((u64)(PGSIZE-1)))
+
 #define ALIGN(x,a)       (((x) + (a) -1) & ~(a-1))
 #define ALIGN_DOWN(x,a)  ((x) & ~(a-1))
 

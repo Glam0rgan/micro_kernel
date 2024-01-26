@@ -22,13 +22,13 @@ static inline Cr3 get_current_cr3(void) {
     return x64KSCurrentCR3;
 }
 
-static inline Cr3 get_current_cr3(void) {
+static inline Cr3 get_current_user_cr3(void) {
     return get_current_cr3();
 }
 
 static inline void set_current_cr3(Cr3 cr3) {
     x64KSCurrentCR3 = cr3;
-    u64 cr3U64 = (u64)cr3;
+    uint64_t cr3U64 = *(u64*)&cr3;
     write_cr3(cr3U64);
 }
 

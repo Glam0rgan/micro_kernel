@@ -1,8 +1,9 @@
 #include <config.h>
 #include <api/failures.h>
 #include <machine/io.h>
-#include <arch/kernel/vspace.h>
 #include <object/structures.h>
+#include <arch/kernel/vspace.h>
+#include <mode/machine.h>
 
 // Change the cr3 register
 void set_vm_root(Tcb* tcb) {

@@ -1,6 +1,5 @@
 #include <types.h>
-#include <ctypes.h>
-#include <untyped.h>
+#include <object/untyped.h>
 
 // Choose some capability in untyped element to create a new CNode.
 Exception invoke_untyped_retype(Cte* srcSlot, bool reset,

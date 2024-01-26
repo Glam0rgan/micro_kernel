@@ -9,77 +9,15 @@
 #include <arch/kernel/thread.h>
 #include <machine/registerset.h>
 #include <object/structures.h>
+#include <object/tcb.h>
 
 extern ExtraCaps currentExtraCaps;
 
-// Get the Buffer from tcb sender anb receiver
-// next invoke do_normal_transfer if ok
-// else invoke do_fault_transfer
-void do_ipc_transfer(Tcb* sender, Endpoint* endpoint,
-  u64 badge, bool grant, Tcb* receiver) {
-  void* receiveBuffer, * sendBuffer;
+TcbQueue ksReadyQueues;
+Tcb* ksCurThread;
 
-  // Get the address of receiver
-  receiveBuffer = lookup_ipc_buffer(true, receiver);
-
-  // Guarantee the sender has no fault
-  if(likely(sender->tcbFault.OsFaultType) == NullFault) {
-    sendBuffer = lookup_ipc_buffer(false, sender);
-    do_normal_transfer(sender, sendBuffer, endpoint, badge,
-      grant, receiver, receiveBuffer);
-  } else {
-    do_fault_transfer(badge, sender, receiver, receiveBuffer);
-  }
-}
-
-void do_normal_transfer(Tcb* sender, u64* sendBuffer, Endpoint* endpoint,
-  u64 badge, bool canGrant, Tcb* receiver,
-  u64* receiveBuffer) {
-  u64 msgTransferred;
-  OsMessageInfo tag;
-  Exception status;
-
-  tag = messageinfo_from_u64(getRegister(sender, msgInfoRegister));
-
-  if(canGrant) { // If sender grant capabilities to receiver
-
-    // Get the extra_caps from sender.
-    status = lookup_extra_caps(sender, sendBuffer, tag);
-
-    // If return exception, set excaprefs Null.
-    if(unlikely(status != EXCEPTION_NONE)) {
-      currentExtraCaps.excaprefs[0] = NULL;
-    }
-  } else { // If don't grant , set excaprefs Null.
-    currentExtraCaps.excaprefs[0] = NULL;
-  }
-
-  // Copy sendBuffer to receiveBuffer.
-  msgTransferred = copyMRs(sender, sendBuffer, receiver, receiveBuffer,
-    tag.length);
-
-  tag = transfer_caps(tag, endpoint, receiver, receiveBuffer);
-
-  tag.length = msgTransferred;
-
-  setRegister(receiver, msgInfoRegister, u64_from_messageinfo(tag));
-  setRegister(receiver, badgeRegister, badge);
-}
-
-void do_fault_transfer(u64 badge, Tcb* sender, Tcb* reveiver,
-  u64* reveiverIPCBuffer) {
-
-}
-
-// Resume the current thread and invoke reschedule_required
-// to add ksSchedulerAction to the scheduler queue
-void schedule_tcb(Tcb* tptr) {
-  if(tptr == NODE_STATE(ksCurThread) &&
-    NODE_STATE(ksSchedulerAction) == SchedulerAction_ResumeCurrentThread &&
-    !isSchedulable(tptr)) {
-    reschedule_required();
-  }
-}
+Tcb* ksSchedulerAction;
+__thread OsIPCBuffer* __osIPCBuffer;
 
 // Like getReceiveSlots, this is specialised for single-cap transfer.
 static OsMessageInfo transfer_caps(OsMessageInfo info,
@@ -91,7 +29,7 @@ static OsMessageInfo transfer_caps(OsMessageInfo info,
   info.capsUnwrapped = 0;
 
   // If extra caps is empty or don't have receive buffer.
-  if(likely(!current_extra_caps.excaprefs[0] || !receiveBuffer)) {
+  if(likely(!currentExtraCaps.excaprefs[0] || !receiveBuffer)) {
     return info;
   }
 
@@ -120,10 +58,11 @@ static OsMessageInfo transfer_caps(OsMessageInfo info,
         break;
       }
       if(dcRet.cap.capType != cap_null_cap) {
+
         break;
       }
 
-      cte_inssert(dcRet.cap, slot, destSlot);
+      cte_insert(dcRet.cap, slot, destSlot);
 
       destSlot = NULL;
     }
@@ -131,6 +70,75 @@ static OsMessageInfo transfer_caps(OsMessageInfo info,
 
   info.extraCaps = i;
   return info;
+}
+
+// Get the Buffer from tcb sender anb receiver
+// next invoke do_normal_transfer if ok
+// else invoke do_fault_transfer
+void do_ipc_transfer(Tcb* sender, Endpoint* endpoint,
+  u64 badge, bool grant, Tcb* receiver) {
+  void* receiveBuffer, * sendBuffer;
+
+  // Get the address of receiver
+  receiveBuffer = lookup_ipc_buffer(true, receiver);
+
+  // Guarantee the sender has no fault
+  if(likely(sender->tcbFault.osFaultType) == NullFault) {
+    sendBuffer = lookup_ipc_buffer(false, sender);
+    do_normal_transfer(sender, sendBuffer, endpoint, badge,
+      grant, receiver, receiveBuffer);
+  } else {
+    do_fault_transfer(badge, sender, receiver, receiveBuffer);
+  }
+}
+
+void do_normal_transfer(Tcb* sender, u64* sendBuffer, Endpoint* endpoint,
+  u64 badge, bool canGrant, Tcb* receiver,
+  u64* receiveBuffer) {
+  u64 msgTransferred;
+  OsMessageInfo tag;
+  Exception status;
+
+  tag = messageinfo_from_u64(get_register(sender, msgInfoRegister));
+
+  if(canGrant) { // If sender grant capabilities to receiver
+
+    // Get the extra_caps from sender.
+    status = lookup_extra_caps(sender, sendBuffer, tag);
+
+    // If return exception, set excaprefs Null.
+    if(unlikely(status != EXCEPTION_NONE)) {
+      currentExtraCaps.excaprefs[0] = NULL;
+    }
+  } else { // If don't grant , set excaprefs Null.
+    currentExtraCaps.excaprefs[0] = NULL;
+  }
+
+  // Copy sendBuffer to receiveBuffer.
+  msgTransferred = copyMRs(sender, sendBuffer, receiver, receiveBuffer,
+    tag.length);
+
+  tag = transfer_caps(tag, endpoint, receiver, receiveBuffer);
+
+  tag.length = msgTransferred;
+
+  set_register(receiver, msgInfoRegister, u64_from_messageinfo(tag));
+  set_register(receiver, badgeRegister, badge);
+}
+
+void do_fault_transfer(u64 badge, Tcb* sender, Tcb* reveiver,
+  u64* reveiverIPCBuffer) {
+
+}
+
+// Resume the current thread and invoke reschedule_required
+// to add ksSchedulerAction to the scheduler queue
+void schedule_tcb(Tcb* tptr) {
+  if(tptr == NODE_STATE(ksCurThread) &&
+    NODE_STATE(ksSchedulerAction) == SchedulerAction_ResumeCurrentThread &&
+    !isSchedulable(tptr)) {
+    reschedule_required();
+  }
 }
 
 void do_nbRecvFailed_transfer(Tcb* thread) {
@@ -168,7 +176,7 @@ void schedule(void) {
 }
 
 void choose_thread(void) {
-  thread = NODE_STATE(ksReadyQueues).head;
+  Tcb* thread = NODE_STATE(ksReadyQueues).head;
   switch_to_thread(thread);
 }
 
@@ -196,7 +204,7 @@ void reschedule_required(void) {
   NODE_STATE(ksSchedulerAction) = SchedulerAction_ChooseNewThread;
 }
 
-void set_threadState(Tcb* tptr, _ThreadState ts) {
+void set_threadState(Tcb* tptr, enum _ThreadState ts) {
   tptr->tcbState.tsType = ts;
   schedule_tcb(tptr);
 }

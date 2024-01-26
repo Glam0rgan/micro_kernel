@@ -15,5 +15,5 @@
 #define SchedulerAction_ChooseNewThread ((Tcb*) 1)
 #define NODE_STATE(_state)    NODE_STATE_ON_CORE(_state, get_current_cpu_index())
 
-TcbQueue ksReadyQueues;
-Tcb* ksCurThread;
+extern TcbQueue ksReadyQueues;
+extern Tcb* ksCurThread;

@@ -1,5 +1,6 @@
 
-#define EXTMEM  0x100000            // Start of extended memory
+#define EXTMEM        0x100000            // Start of extended memory
+#define DEVSPACE      0xFE000000         // Other devices are at high addresses
 
 #define KERNBASE      0xFFFFFFFF80000000         // First kernel address
 #define DEVBASE       0xFFFFFFFF40000000 // First device virtual address

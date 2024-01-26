@@ -1,9 +1,11 @@
-#include "types.h"
-#include "memblock.h"
-#include "memlayout.h"
-#include "mmu.h"
-#include "defs.h"
+#include <types.h>
+#include <kernel/memblock.h>
+#include <kernel/memlayout.h>
+#include <kernel/mmu.h>
+#include <kernel/defs.h>
 
+#define max(a, b) ((a) > (b) ? (a) : (b))
+#define min(a, b) ((a) < (b) ? (a) : (b))
 #define clamp(val, lo, hi) min( (typeof(val))(max(val, lo)),hi) 
 
 void print_memblock(struct memblock_type* type);

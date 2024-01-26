@@ -1,6 +1,7 @@
-#include<types.h>
-#include<api/failures.h>
+#include <types.h>
+#include <api/failures.h>
+#include <object/structures.h>
 
-OsFault currentFault;
+enum OsFaultType currentFault;
 LookupFault currentLookupFault;
 SyscallError currentSyscallError;

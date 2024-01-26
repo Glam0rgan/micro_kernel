@@ -41,7 +41,7 @@
 #define TCCR    (0x0390/4)   // Timer Current Count
 #define TDCR    (0x03E0/4)   // Timer Divide Configuration
 
-volatile u64* lapic;  // Initialized in mp.c
+volatile u32* lapic;  // Initialized in mp.c
 
 static void lapicw(int index, int value) {
     lapic[index] = value;

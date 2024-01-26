@@ -18,12 +18,9 @@ def move_elf(filename):
     cmd = "dd if="+root_dir+"/"+filename+" of="+pwd+"/out/fs.img"+" bs=512 seek="+str(nblocks)+" count="+str(blocknum)
     print(filename)
     os.system(cmd)
-    nblocks += blocknum
-
-pattern = 'plugin*'  
+    nblocks += blocknum 
 
 root_dir = pwd+"/fs"
 for root, dirs, files in os.walk(root_dir):
     for file in files:
-        if fnmatch.fnmatch(file,pattern) :
-            move_elf(file)
+    	move_elf(file)
