@@ -60,6 +60,9 @@
 #define SEG_UDATA 5  // user data+stack
 #define SEG_TSS   6  // this process's task state
 
+// Address in page table or page directory entry
+#define PTE_ADDR(pte)   ((uint64_t)(pte) & ~0xFFF)
+
 #define BUUDY_TYPES 12
 #define NULL ((void* )0)
 

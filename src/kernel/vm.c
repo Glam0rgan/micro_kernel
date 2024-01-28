@@ -4,6 +4,7 @@
 #include <kernel/memlayout.h>
 #include <kernel/vm.h>
 #include <object/tcb.h>
+#include <kernel/x86.h>
 
 #define kernelFirstSize 0x4000000
 #define KernelFirstHasMappedEnd  0xFFFFFFFF84000000

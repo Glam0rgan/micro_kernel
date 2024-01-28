@@ -218,4 +218,4 @@ typedef struct _Cr3 {
 }Cr3;
 
 
-typedef Pml4e VspaceRoot;
+typedef Pml4e VSpaceRoot;

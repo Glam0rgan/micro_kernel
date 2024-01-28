@@ -37,11 +37,11 @@ void ipc_test(void) {
   cteRoot->cteMdbNode.mdbNext = NULL;
 
   // Init the CNodeCap.
-  create_new_object(osCapTableObject, cteRoot,
+  create_new_objects(osCapTableObject, cteRoot,
     TCB_PTR_CTE_PTR(tcbPlugin0, tcbCTable), 0, 1,
     cnodePtrPlugin0, 0, 0);
 
-  create_new_object(osCapTableObject, cteRoot,
+  create_new_objects(osCapTableObject, cteRoot,
     TCB_PTR_CTE_PTR(tcbPlugin1, tcbCTable), 0, 1,
     cnodePtrPlugin1, 0, 0);
 

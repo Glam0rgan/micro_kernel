@@ -24,3 +24,4 @@ root_dir = pwd+"/fs"
 for root, dirs, files in os.walk(root_dir):
     for file in files:
     	move_elf(file)
+

@@ -32,7 +32,7 @@ Exception lookup_extra_caps(Tcb* thread, u64* bufferPtr, OsMessageInfo info) {
 
     // Check the status
     if(luRet.status != EXCEPTION_NONE) {
-      currentFault = Osfault_capfault_new(cptr, false);
+      //currentFault = Osfault_capfault_new(cptr, false);
       return luRet.status;
     }
 

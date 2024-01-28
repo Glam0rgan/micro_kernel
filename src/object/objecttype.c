@@ -104,7 +104,7 @@ Cap create_object(ApiObject objectType, void* regionBase, u64 userSize, bool dev
   }
 }
 
-void create_new_object(u64 objectType, Cte* parent,
+void create_new_objects(u64 objectType, Cte* parent,
     Cte* destCNode, u64 destOffset, u64 destLength,
     void* regionBase, u64 userSize, bool deviceMemory) {
     u64 objectSize;
