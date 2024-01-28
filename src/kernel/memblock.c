@@ -233,7 +233,7 @@ static u64 memblock_alloc_range(u64 size, u64 align, u64 start, u64 end) {
   return 0;
 }
 
-u64 membloc_alloc_kernel(u64 size, u64 align) {
+u64 memblock_alloc_kernel(u64 size, u64 align) {
   return p2v(memblock_alloc_range(size, align, kernelHasMappedEnd - kernelSize, kernelHasMappedEnd));
 }
 

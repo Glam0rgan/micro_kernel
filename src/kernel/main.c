@@ -37,11 +37,11 @@ void ipc_test(void) {
   cteRoot->cteMdbNode.mdbNext = NULL;
 
   // Init the CNodeCap.
-  create_new_object(osCapTableObject, cteRoot,
+  create_new_objects(osCapTableObject, cteRoot,
     TCB_PTR_CTE_PTR(tcbPlugin0, tcbCTable), 0, 1,
     cnodePtrPlugin0, 0, 0);
 
-  create_new_object(osCapTableObject, cteRoot,
+  create_new_objects(osCapTableObject, cteRoot,
     TCB_PTR_CTE_PTR(tcbPlugin1, tcbCTable), 0, 1,
     cnodePtrPlugin1, 0, 0);
 
@@ -63,15 +63,22 @@ void ipc_test(void) {
 
 int main(void) {
 
+  panic("ok1");
   // Init kernel.
   vm_init();
+  panic("ok2");
   memblock_init();
+  panic("ok3");
   lapic_init();
+  panic("ok4");
   ioapic_init();
+  panic("ok5");
   console_init();
+  panic("ok6");
 
   char*** pluginArgv;
   load_plugin(pluginArgv);
+  panic("ok7");
 
   ipc_test();
 
