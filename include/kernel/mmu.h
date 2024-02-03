@@ -94,9 +94,9 @@
 
 #ifndef __ASSEMBLER__
 
-struct MEMORY_E820{
+struct MEMORY_E820 {
   int nr_map;
-  struct{
+  struct {
     u64 addr;
     u64 len;
     u32 type;
@@ -130,11 +130,11 @@ struct segdesc {
   ((u64p)(base) >> 16) & 0xff, type, 1, dpl, 1,       \
   (u64p)(lim) >> 16, 0, 0, 1, 0, (u64p)(base) >> 24 }
 
-struct list_head{
-  struct list_head *next, *prev;
+struct list_head {
+  struct list_head* next, * prev;
 };
 
-struct free_area{
+struct free_area {
   //struct list_head free_list;
   u64 nr_free;
 };
@@ -144,7 +144,7 @@ struct free_area{
 
 //}zone1;
 
-struct page{
+struct page {
   //struct list_head lru;
   u64 vaddr;
   u64 paddr;

@@ -5,7 +5,10 @@
 #include <kernel/vm.h>
 #include <object/tcb.h>
 #include <kernel/x86.h>
+<<<<<<< HEAD
 #include <object/structures.h>
+=======
+>>>>>>> 6a5a4048b3c0c315880bb4c4401ab5fa3a57dffb
 
 #define kernelFirstSize 0x40000000
 #define KernelFirstHasMappedEnd  0xFFFFFFFFA0000000
