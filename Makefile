@@ -256,6 +256,9 @@ PLUGINS=\
 	fs/sendtest\
 	fs/reveivetest\
 
+out/.gdbinit: tools/gdbinit.tmpl
+	sed "s/localhost:1234/localhost:$(GDBPORT)/" < $^ > $@
+
 out/fs.img : $(PLUGINS)
 	dd if=/dev/zero of=out/os.img count=10000
 	python3 ./tools/movePlugin.py
