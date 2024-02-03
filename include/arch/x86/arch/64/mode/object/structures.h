@@ -45,7 +45,7 @@
 #define PT_REF(p)    ((u64)(p))
 
 typedef struct Trapframe_t {
-  u64 eax;      // rax
+  u64 rax;      // rax
   u64 rbx;
   u64 rcx;
   u64 rdx;
@@ -218,4 +218,4 @@ typedef struct _Cr3 {
 }Cr3;
 
 
-typedef Pml4e VspaceRoot;
+typedef Pml4e VSpaceRoot;

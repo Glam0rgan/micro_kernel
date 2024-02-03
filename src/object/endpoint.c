@@ -29,7 +29,7 @@ void send_ipc(bool blocking, bool doCall, u64 badge,
       (&thread->tcbState)->blockingIPCCangrantreply = canGrantReply;
       (&thread->tcbState)->blockingIPCIscall = doCall;
 
-      schedule_tcb(thread);
+      //schedule_tcb(thread);
 
       // Place calling thread in endpoint queue
       queue = epptr_get_queue(epptr);

@@ -32,7 +32,7 @@ Exception lookup_extra_caps(Tcb* thread, u64* bufferPtr, OsMessageInfo info) {
 
     // Check the status
     if(luRet.status != EXCEPTION_NONE) {
-      currentFault = Osfault_capfault_new(cptr, false);
+      //currentFault = Osfault_capfault_new(cptr, false);
       return luRet.status;
     }
 
@@ -149,7 +149,7 @@ void tcb_sched_append(Tcb* tcb) {
     if(!queue.head) { // Empty List
       queue.head = tcb;
     } else {
-      queue.end->tcbSchedPrev = tcb;
+      queue.end->tcbSchedNext = tcb;
     }
     tcb->tcbSchedPrev = queue.end;
     tcb->tcbSchedNext = NULL;

@@ -26,7 +26,8 @@ Exception invoke_untyped_retype(Cte* srcSlot, bool reset,
     totalObjectSize = destLength << get_object_size(newType, userSize);
     freeRef = (u64)retypeBase + totalObjectSize;
 
-    untypedCap.capFreeIndex = GET_FREE_INDEX(regionBase, freeRef);
+    // GET_FREE_INDEX(regionBase, freeRef)
+    untypedCap.capFreeIndex = 0;
     srcSlot->cap = *(Cap*)(&untypedCap);
 
     // Create new objects and caps.

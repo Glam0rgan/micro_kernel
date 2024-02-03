@@ -52,12 +52,15 @@ LookupSlotRawRet lookup_slot(Tcb* thread, CPtr capptr) {
 
   // Get the cnode_cap for the root cnode address.
   threadRoot = TCB_PTR_CTE_PTR(thread, tcbCTable)->cap;
-
+  CNodeCap* cnode = (CNodeCap*)&threadRoot;
+  //cprintf("cnode %l\n", (cnode->capCNodePtr<<1) | 0xFFFF800000000000);
+  ret.slot = ((cnode->capCNodePtr << 1) | 0xFFFF800000000000) + capptr;
+   
   // Get the status and concrete slot
-  resRet = resolve_address_bits(threadRoot, capptr, wordBits);
+  //resRet = resolve_address_bits(threadRoot, capptr, wordBits);
 
-  ret.status = resRet.status;
-  ret.slot = resRet.slot;
+  //ret.status = resRet.status;
+  //ret.slot = resRet.slot;
   return ret;
 }
 

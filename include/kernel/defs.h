@@ -22,6 +22,7 @@ u64             memblock_alloc_kernel(u64 size, u64 align);
 void            test(void);
 void            send(OsCPtr dest, OsMessageInfo msgInfo);
 void            receive(OsCPtr dest, OsMessageInfo* msgInfo);
+void            alloc_proc(Tcb* tcb);
 
 // string.c
 int             memcmp(const void*, const void*, u32);
@@ -33,6 +34,7 @@ int             strncmp(const char*, const char*, u32);
 char* strncpy(char*, const char*, int);
 
 // vm.c
+void seg_init(void);
 void vm_init(void);
 int alloc_uvm(u64* pml4, u64 oldSize, u64 newSize);
 u64* setup_user_memory_pages(void);

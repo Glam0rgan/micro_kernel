@@ -81,17 +81,19 @@ Cte* get_receive_slots(Tcb* thread, u64* buffer) {
 }
 
 void insert_new_cap(Cte* parent, Cte* slot, Cap cap) {
-    Cte* next;
-
-    next = CTE_PTR(parent->cteMdbNode.mdbNext);
+    //Cte* next;
+    //cprintf("%l\n", slot);
+    //panic("insert_new_cap");
+    //next = CTE_PTR(parent->cteMdbNode.mdbNext);
+    //panic("%l",slot->cap.capType);
     slot->cap = cap;
-    slot->cteMdbNode.mdbNext = CTE_REF(next);
-    slot->cteMdbNode.mdbRevocable = true;
-    slot->cteMdbNode.mdbFirstBadged = true;
-    slot->cteMdbNode.mdbPrev = CTE_REF(parent);
+    //slot->cteMdbNode.mdbNext = CTE_REF(next);
+    //slot->cteMdbNode.mdbRevocable = true;
+    //slot->cteMdbNode.mdbFirstBadged = true;
+    //slot->cteMdbNode.mdbPrev = CTE_REF(parent);
 
-    if(next) {
-        next->cteMdbNode.mdbPrev = CTE_REF(slot);
-    }
-    parent->cteMdbNode.mdbNext = CTE_REF(slot);
+    //if(next) {
+    //    next->cteMdbNode.mdbPrev = CTE_REF(slot);
+    //}
+    //parent->cteMdbNode.mdbNext = CTE_REF(slot);
 }

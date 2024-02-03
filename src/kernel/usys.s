@@ -21,7 +21,11 @@ print:
   movl $4, %eax;
   int $T_SYSCALL;
   ret
-
+.globl exit;
+exit:
+  movl $5, %eax;
+  int $T_SYSCALL;
+  ret
 
 
 

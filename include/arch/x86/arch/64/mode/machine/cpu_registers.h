@@ -1,7 +1,7 @@
 #pragma once
 
 static inline unsigned long read_cr3(void) {
-    word_t cr3;
+    uint64_t cr3;
     asm volatile("movq %%cr3, %0" : "=r"(cr3), "=m"(control_reg_order));
     return cr3;
 }

@@ -4,7 +4,7 @@
 #include <proc.h>
 #include <model/statedata.h>
 
-void trap(struct trapframe* tf) {
+void trap(Trapframe* tf) {
   if(tf->trapno == T_SYSCALL) {
     ksCurThread->tf = tf;
     syscall();

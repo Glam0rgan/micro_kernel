@@ -1,16 +1,17 @@
+#pragma once
 // Segments in proc->gdt.
 #define NSEGS     7
 #define NCPU      8
 // Per-CPU state
 struct cpu {
-  u8 id;                    // index into cpus[] below
-  u8 apicid;                // Local APIC ID
-  struct context *scheduler;   // swtch() here to enter scheduler
+  uint8_t id;                    // index into cpus[] below
+  uint8_t apicid;                // Local APIC ID
+  struct context *schedulerContext;   // swtch() here to enter scheduler
   //struct taskstate ts;         // Used by x86 to find stack for interrupt
   //struct segdesc gdt[NSEGS];   // x86 global descriptor table
   //volatile uint started;       // Has the CPU started?
-  int ncli;                    // Depth of pushcli nesting.
-  int intena;                  // Were interrupts enabled before pushcli?
+  //int ncli;                    // Depth of pushcli nesting.
+  //int intena;                  // Were interrupts enabled before pushcli?
 
   // Cpu-local storage variables; see below
   void *local;
@@ -28,7 +29,6 @@ extern int ncpu;
 // This is similar to how thread-local variables are implemented
 // in thread libraries such as Linux pthreads.
 extern __thread struct cpu *cpu;
-extern __thread struct proc *proc;
 
 //PAGEBREAK: 17
 // Saved registers for kernel context switches.
@@ -41,32 +41,16 @@ extern __thread struct proc *proc;
 // The layout of the context matches the layout of the stack in swtch.S
 // at the "Switch stacks" comment. Switch doesn't save eip explicitly,
 // but it is on the stack and allocproc() manipulates it.
-struct context {
+typedef struct context {
   u64 r15;
   u64 r14;
   u64 r13;
   u64 r12;
   u64 r11;
   u64 rbx;
-  u64 ebp; //rbp
-  u64 eip; //rip;
-};
-
-enum procstate { UNUSED, EMBRYO, SLEEPING, RUNNABLE, RUNNING, ZOMBIE };
-
-// Per-process state
-struct proc {
-  u64 sz;                     // Size of process memory (bytes)
-  char *kstack;                // Bottom of kernel stack for this process
-  enum procstate state;        // Process state
-  volatile int pid;            // Process ID
-  struct proc *parent;         // Parent process
-  struct trapframe *tf;        // Trap frame for current syscall
-  struct context *context;     // swtch() here to run process
-  void *chan;                  // If non-zero, sleeping on chan
-  int killed;                  // If non-zero, have been killed
-  char name[16];               // Process name (debugging)
-};
+  u64 rbp; //rbp
+  u64 rip; //rip;
+}Context;
 
 // Process memory is laid out contiguously, low addresses first:
 //   text

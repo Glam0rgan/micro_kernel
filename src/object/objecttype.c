@@ -61,6 +61,7 @@ Cap create_object(ApiObject objectType, void* regionBase, u64 userSize, bool dev
     }
     case osEndpointObject: {
         EndpointCap endpointCap;
+        endpointCap.capEPBadge = 0;
         endpointCap.capCanGrant = 1;
         endpointCap.capCanGrantReply = 1;
         endpointCap.capCanReceive = 1;
@@ -104,7 +105,7 @@ Cap create_object(ApiObject objectType, void* regionBase, u64 userSize, bool dev
   }
 }
 
-void create_new_object(u64 objectType, Cte* parent,
+void create_new_objects(u64 objectType, Cte* parent,
     Cte* destCNode, u64 destOffset, u64 destLength,
     void* regionBase, u64 userSize, bool deviceMemory) {
     u64 objectSize;
@@ -117,9 +118,11 @@ void create_new_object(u64 objectType, Cte* parent,
     for(i = 0;i < destLength;i++) {
         //Create the object.
         Cap cap = create_object(objectType, (void*)((u64)nextFreeArea + (i << objectSize)), userSize, deviceMemory);
-
+        //cprintf("%l\n", destCNode);
+	//panic("ok1");
         // Insert the cap into the user's cspace.
         insert_new_cap(parent, &destCNode[destOffset + i], cap);
+        
     }
 }
 /*
