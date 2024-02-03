@@ -5,6 +5,10 @@ void main(void) {
     OsMessageInfo msg;
     receive(0, &msg);
     OsWord id;
-    id = os_get_mr(0);
+    OsIPCBuffer* bufferPoint = 0x2000;
+    id = bufferPoint->msg[0];
+    test();
+    print(id);
+    exit();
     //printf("receive the id %l", id);
 }

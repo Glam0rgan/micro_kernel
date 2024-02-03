@@ -12,6 +12,11 @@ int sys_test(void) {
     return 0;
 }
 
+int sys_exit(void){
+    exit();
+    return 0;
+}
+
 int sys_send(void) {
     OsCPtr ptr;
     OsMessageInfo msg;
@@ -26,6 +31,13 @@ int sys_send(void) {
 
     send(ptr, msg);
     return 0;
+}
+
+int sys_print(void){
+   uint64_t num;
+   arg_uint64(0, &num);
+   
+   print(num);
 }
 
 int sys_receive(void) {

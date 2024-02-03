@@ -233,10 +233,6 @@ static u64 memblock_alloc_range(u64 size, u64 align, u64 start, u64 end) {
   return 0;
 }
 
-u64 membloc_alloc_kernel(u64 size, u64 align) {
-  return p2v(memblock_alloc_range(size, align, kernelHasMappedEnd - kernelSize, kernelHasMappedEnd));
-}
-
 u64 __memblock_alloc_base(u64 size, u64 align, u64 max_addr) {
   return memblock_alloc_range(size, align, 0, max_addr);
 }
@@ -253,6 +249,10 @@ u64 memblock_alloc_base(u64 size, u64 align, u64 max_addr) {
   memset(p2v(alloc), 0, size);
   //cprintf("alloc success\n");
   return alloc;
+}
+
+u64 memblock_alloc_kernel(u64 size, u64 align) {
+  return p2v(memblock_alloc_base(size, align, MEMBLOCK_ALLOC_ACCESSIBLE));
 }
 
 u64 memblock_alloc(u64 size, u64 align) {
@@ -356,7 +356,7 @@ void memblock_init() {
   }
   cprintf("%dMB\n", mem_tot / 1048576 + 1);
   print_memblock(&memblock.memory);
-  memblock_test();
+  //memblock_test();
 }
 
 void memblock_test() {

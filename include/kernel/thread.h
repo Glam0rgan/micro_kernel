@@ -23,6 +23,7 @@ static inline CONST u64 ready_queues_index(u64 dom, u64 prio) {
 void arch_switch_to_thread(Tcb* tcb);
 
 void schedule_tcb(Tcb* tptr);
+void sched(void);
 
 void set_thread_state(Tcb* tptr, enum _ThreadState ts);
 

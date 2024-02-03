@@ -6,6 +6,7 @@
 #include <os/constants.h>
 #include <arch/object/structures.h>
 #include <mode/object/structures.h>
+#include <kernel/proc.h>
 
 #define wordRadix 6
 
@@ -96,7 +97,7 @@ typedef struct _EndpointCap {
   u64 capCanGrant : 1;
   u64 capCanReceive : 1;
   u64 capCanSend : 1;
-  u64 padding : 7;
+  u64 : 7;
   u64 capEPPtr : 48; // high
 } EndpointCap;
 
@@ -181,8 +182,8 @@ typedef struct _DomainCap {
 // Enpoint size = 16 bytes
 typedef struct _Endpoint {
   u64 epQueueHead;
-  u64 padding : 16;
-  u64 epQueueTail : 46; // high
+  u64 padding : 14;
+  u64 epQueueTail : 48; // high
   u64 state : 2;
 }Endpoint;
 
@@ -336,8 +337,14 @@ struct _Tcb {
   LookupFault tcbLookupFailure;
 
   Trapframe* tf;
+  
+  Context* context;
 
-  u64 tcbMcp;
+  u64 size;
+  
+  u64* pml4;
+	
+  char* kStack;
 
   u64 tcbPriority;
 
@@ -363,6 +370,7 @@ typedef struct _IpcBuffer {
   u64 receiveIndex;
   u64 receiveDepth;
 }IpcBuffer __attribute__((__aligned__(sizeof(struct _IpcBuffer))));
+
 
 enum EndpointState {
   EPState_Idle = 0,

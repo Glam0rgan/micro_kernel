@@ -6,6 +6,7 @@
 #include <arch/machine/cpu_registers.h>
 #include <arch/machine.h>
 #include <mode/object/structures.h>
+#include <kernel/x86.h>
 
 extern Cr3 x64KSCurrentCR3;
 
@@ -29,7 +30,7 @@ static inline Cr3 get_current_user_cr3(void) {
 static inline void set_current_cr3(Cr3 cr3) {
     x64KSCurrentCR3 = cr3;
     uint64_t cr3U64 = *(u64*)&cr3;
-    write_cr3(cr3U64);
+    lcr3(cr3U64);
 }
 
 /* there is no option for preservation translation when setting the user cr3

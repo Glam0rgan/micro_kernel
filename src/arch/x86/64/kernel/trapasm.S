@@ -25,6 +25,7 @@ alltraps:
   # Return falls through to trapret...
 .globl trapret
 trapret:
+  
   pop %rax
   pop %rbx
   pop %rcx

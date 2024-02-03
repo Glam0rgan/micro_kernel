@@ -38,12 +38,16 @@ void* memmove(void* dst, const void* src, u32 n){
   if(s < d && s + n > d){
     s += n;
     d += n;
-    while(n-- > 0)
+    while(n-- > 0){
+      //if(*s != '0')cprintf("%l\n",*s);
       *--d = *--s;
+      }
   }
   else
-    while(n-- > 0)
+    while(n-- > 0){
+    //if(*s != '0')cprintf("%l\n",*s);
       *d++ = *s++;
+      }
    
   return dst;
 }

@@ -24,6 +24,15 @@
         "tcb.h": "c",
         "io.h": "c",
         "notification.h": "c",
-        "statedata.h": "c"
+        "statedata.h": "c",
+        "interrupt.h": "c",
+        "registerset.h": "c",
+        "config.h": "c",
+        "memlayout.h": "c",
+        "types.h": "c",
+        "structures.h": "c",
+        "proc.h": "c",
+        "traps.h": "c",
+        "defs.h": "c"
     },
 }

@@ -12,9 +12,11 @@
 #include <object/tcb.h>
 
 extern ExtraCaps currentExtraCaps;
+extern struct cpu cpus[NCPU];
 
 TcbQueue ksReadyQueues;
 Tcb* ksCurThread;
+Tcb* oldThread;
 
 Tcb* ksSchedulerAction;
 __thread OsIPCBuffer* __osIPCBuffer;
@@ -147,9 +149,20 @@ void do_nbRecvFailed_transfer(Tcb* thread) {
 }
 
 void switch_to_thread(Tcb* thread) {
-  arch_switch_to_thread(thread);
   tcb_sched_dequeue(thread);
+  oldThread = ksCurThread;
   NODE_STATE(ksCurThread) = thread;
+  
+  user_switch_vm(thread);
+  //panic("switch_to_thread");
+  swtch( &oldThread->context, thread->context);
+  //panic("asd");
+  kernel_switch_vm();
+}
+
+// Use to restore the context for kernel.
+void sched(void){
+  swtch( &ksCurThread->context, oldThread->context);
 }
 
 static void schedule_choose_newThread(void) {
@@ -157,15 +170,19 @@ static void schedule_choose_newThread(void) {
 }
 
 void schedule(void) {
+  
   if(ksSchedulerAction != SchedulerAction_ResumeCurrentThread) {
-    bool wasRunnable;
+    //panic("resume");
+    /*bool wasRunnable;
     if(is_runnable(ksCurThread)) {
       wasRunnable = true;
+      panic("run");
+       Add this thread to ksReadyQueue.
       tcb_sched_enqueue(ksCurThread);
     } else {
       wasRunnable = false;
-    }
-
+    }*/
+    //panic("schedule");
     if(ksSchedulerAction == SchedulerAction_ChooseNewThread) {
       schedule_choose_newThread();
     } else {
@@ -173,10 +190,15 @@ void schedule(void) {
     }
   }
   ksSchedulerAction = SchedulerAction_ResumeCurrentThread;
+  
 }
 
 void choose_thread(void) {
+  //panic("choose");
   Tcb* thread = NODE_STATE(ksReadyQueues).head;
+  if(thread == NULL)return;
+  //cprintf("rip : %l\n", thread->tf->rip);
+  //panic("choose_thread");
   switch_to_thread(thread);
 }
 

@@ -2,6 +2,7 @@ BITS = 64
 LDFLAGS = -m elf_x86_64
 XFLAGS = -m64 -DX64 -mcmodel=kernel -mtls-direct-seg-refs -mno-red-zone
 FSIMAGE := fs.img
+QEMU = qemu-system-x86_64
 
 OPT ?= -O0
 
@@ -12,7 +13,7 @@ AS = $(TOOLPREFIX)gas
 LD = $(TOOLPREFIX)ld
 OBJCOPY = $(TOOLPREFIX)objcopy
 OBJDUMP = $(TOOLPREFIX)objdump
-CFLAGS = -fno-pic -static -fno-builtin -nostdlib -fno-strict-aliasing -Wall -MD -ggdb -fno-omit-frame-pointer
+CFLAGS = -fno-pic -static -fno-builtin -nostdlib -fno-strict-aliasing -Wall -MD -ggdb -fno-omit-frame-pointer 
 CFLAGS += -ffreestanding -fno-common -I./include -I./lib -gdwarf-2 $(XFLAGS) $(OPT)
 CFLAGS += $(shell $(CC) -fno-stack-protector -E -x c /dev/null >/dev/null 2>&1 && echo -fno-stack-protector)
 IFLAGS := -I./include/model -I./lib/include/os -I./include/arch/x86 -I./include/arch/x86/arch/64
@@ -26,12 +27,14 @@ ASFLAGS = -fno-pic -gdwarf-2 -Wa,-divide -I./include $(XFLAGS)
 KOBJ := \
 	kobj/inlines.o\
 	kobj/kernel_main.o\
+	kobj/kernel_swtch.o\
 	kobj/kernel_acpi.o\
 	kobj/kernel_console.o\
 	kobj/kernel_cspace.o\
 	kobj/kernel_ioapic.o\
 	kobj/kernel_lapic.o\
 	kobj/kernel_loadplugin.o\
+	kobj/kernel_vm.o\
 	kobj/kernel_memblock.o\
 	kobj/kernel_proc.o\
 	kobj/kernel_string.o\
@@ -39,7 +42,6 @@ KOBJ := \
 	kobj/kernel_sysproc.o\
 	kobj/kernel_thread.o\
 	kobj/kernel_trap.o\
-	kobj/kernel_vm.o\
 	kobj/object_cnode.o\
 	kobj/object_endpoint.o\
 	kobj/object_notification.o\
@@ -51,9 +53,11 @@ KOBJ := \
 	kobj/x86_64_kernel_trapasm.o\
 	kobj/x86_64_kernel_vspace.o\
 	kobj/x86_64_machine_registerset.o\
+	kobj/x86_64_model_statedata.o\
 	kobj/x86_kernel_vspace.o\
 	kobj/x86_machine_registerset.o\
-	kobj/model_statedata.o
+	kobj/model_statedata.o\
+	kobj/vectors.o
 	
 SRCS := $(wildcard src/**/*.c)
 SRSS := $(wildcard src/**/*.s)
@@ -74,7 +78,6 @@ kobj/x86_64_kernel_thread.o: src/arch/x86/64/kernel/thread.c
 
 kobj/x86_64_kernel_trapasm.o: src/arch/x86/64/kernel/trapasm.S
 	@mkdir -p kobj
-	@mkdir -p kobj
 	$(CC) $(ASFLAGS) -c -o $@ $<
 	
 kobj/x86_64_kernel_vspace.o: src/arch/x86/64/kernel/vspace.c
@@ -82,6 +85,10 @@ kobj/x86_64_kernel_vspace.o: src/arch/x86/64/kernel/vspace.c
 	$(CC) $(CFLAGS) $(IFLAGS) -c -o $@ $<
 	
 kobj/x86_64_machine_registerset.o: src/arch/x86/64/machine/registerset.c
+	@mkdir -p kobj
+	$(CC) $(CFLAGS) $(IFLAGS) -c -o $@ $<
+	
+kobj/x86_64_model_statedata.o: src/arch/x86/64/model/statedata.c
 	@mkdir -p kobj
 	$(CC) $(CFLAGS) $(IFLAGS) -c -o $@ $<
 
@@ -100,6 +107,14 @@ kobj/kernel_acpi.o: src/kernel/acpi.c
 kobj/kernel_console.o: src/kernel/console.c
 	@mkdir -p kobj
 	$(CC) $(CFLAGS) $(IFLAGS) -c -o $@ $<
+	
+kobj/kernel_swtch.o: src/kernel/swtch.S
+	@mkdir -p kobj
+	$(CC) $(ASFLAGS) -c -o $@ $<
+
+kobj/vectors.o: out/vectors.S
+	@mkdir -p kobj
+	$(CC) $(ASFLAGS) -c -o $@ $<
 
 kobj/kernel_cspace.o: src/kernel/cspace.c
 	@mkdir -p kobj
@@ -185,12 +200,10 @@ kobj/inlines.o: src/inlines.c
 	@mkdir -p kobj
 	$(CC) $(CFLAGS) $(IFLAGS) -c -o $@ $<
 
-FSIMAGE := out/fs.img
-
-os.img: out/bootblock out/kernel.elf fs.img
-	dd if=/dev/zero of=os.img count=10000
-	dd if=out/bootblock of=os.img conv=notrunc
-	dd if=out/kernel.elf of=os.img conv=notrunc
+out/os.img: out/bootblock out/kernel.elf out/fs.img
+	dd if=/dev/zero of=out/os.img count=10000
+	dd if=out/bootblock of=out/os.img conv=notrunc
+	dd if=out/kernel.elf of=out/os.img seek=1 conv=notrunc
 
 out/bootblock: src/kernel/bootasm.S src/kernel/bootmain.c
 	@mkdir -p out
@@ -203,8 +216,8 @@ out/bootblock: src/kernel/bootasm.S src/kernel/bootmain.c
 
 ENTRYCODE = kobj/entry$(BITS).o
 LINKSCRIPT = src/kernel/kernel$(BITS).ld
-out/kernel.elf:  $(ENTRYCODE) $(LINKSCRIPT) $(FSIMAGE) $(KOBJ)
-	$(LD) $(LDFLAGS) -T $(LINKSCRIPT) -o out/kernel.elf $(ENTRYCODE) $(KOBJ) -b binary $(FSIMAGE)
+out/kernel.elf:  $(ENTRYCODE) $(LINKSCRIPT) $(KOBJ)
+	$(LD) $(LDFLAGS) -T $(LINKSCRIPT) -o out/kernel.elf $(ENTRYCODE) $(KOBJ) -b binary
 	$(OBJDUMP) -S out/kernel.elf > out/kernel.asm
 	$(OBJDUMP) -t out/kernel.elf | sed '1,/SYMBOL TABLE/d; s/ .* / /; /^$$/d' > out/kernel.sym
 
@@ -227,23 +240,33 @@ CPLUGINS=\
 uobj/%.o: $(CPLUGINS)
 	@mkdir -p uobj
 	$(CC) $(CFLAGS) $(IFLAGS) -c -o $@ $<
+	
 
 
 fs/%: uobj/%.o uobj/usys.o libout/os.o
 	@mkdir -p fs out
 	$(LD) $(LDFLAGS) -N -e main -Ttext 0 -o $@  $^
 	
+MKVECTORS = tools/vectors64.pl
+
+out/vectors.S: $(MKVECTORS)
+	perl $(MKVECTORS) > out/vectors.S	
+	
 PLUGINS=\
 	fs/sendtest\
 	fs/reveivetest\
 
 out/fs.img : $(PLUGINS)
+	dd if=/dev/zero of=out/os.img count=10000
 	python3 ./tools/movePlugin.py
 
-QEMUOPTS = -net none -hda os.img -hdb fs.img -m 512 $(QEMUEXTRA)
+QEMUOPTS = -net none -hda out/os.img -hdb out/fs.img -m 512
 
-qemu: $(fs.img) os.img
-    	$(QEMU) -serial mon:stdio$(QEMUOPTS)
+qemu: out/fs.img out/os.img
+	$(QEMU) -serial mon:stdio $(QEMUOPTS) -no-reboot -D ./log.txt -d int
+	
+qemu-gdb: out/fs.img out/os.img
+	$(QEMU) -serial mon:stdio $(QEMUOPTS) -S -s -D ./log.txt -d int
     	
 clean:
 	@rm -rf ./fs

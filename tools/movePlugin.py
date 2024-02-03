@@ -5,7 +5,7 @@ pwd = os.getcwd()
 print(pwd)
 #father_path = os.pardir
 
-nblocks = 0
+nblocks = 1
 blockSize = 512
 
 def move_elf(filename):
@@ -24,3 +24,7 @@ root_dir = pwd+"/fs"
 for root, dirs, files in os.walk(root_dir):
     for file in files:
     	move_elf(file)
+for root, dirs, files in os.walk(root_dir):
+    for file in files:
+    	move_elf(file)
+

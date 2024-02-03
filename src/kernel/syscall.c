@@ -41,19 +41,23 @@ int arg_ptr(int n, char** pp, int size) {
 extern int sys_test(void);
 extern int sys_send(void);
 extern int sys_receive(void);
+extern int sys_exit(void);
+extern int sys_print(void);
 
 static int (*syscalls[])(void) = {
   [SYS_test] sys_test,
   [SYS_send]    sys_send,
-  [SYS_receive] sys_receive
+  [SYS_receive] sys_receive,
+  [SYS_exit]    sys_exit,
+  [SYS_print]   sys_print
 };
 
 void syscall(void) {
   int num;
 
-  num = ksCurThread->tf->eax;
+  num = ksCurThread->tf->rax;
   if(num > 0 && num < NELEM(syscalls) && syscalls[num]) {
-    ksCurThread->tf->eax = syscalls[num]();
+    ksCurThread->tf->rax = syscalls[num]();
   } else {
     panic("syscall_error");
   }

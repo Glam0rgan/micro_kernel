@@ -1,56 +1,42 @@
 // Routines to let C code use special x86 instructions.
 
-static inline u8
-inb(u16 port)
-{
+static inline u8 inb(u16 port){
   u8 data;
 
   asm volatile("in %1,%0" : "=a" (data) : "d" (port));
   return data;
 }
 
-static inline void
-insl(int port, void *addr, int cnt)
-{
+static inline void insl(int port, void *addr, int cnt){
   asm volatile("cld; rep insl" :
                "=D" (addr), "=c" (cnt) :
                "d" (port), "0" (addr), "1" (cnt) :
                "memory", "cc");
 }
 
-static inline void
-outb(u16 port, u8 data)
-{
+static inline void outb(u16 port, u8 data){
   asm volatile("out %0,%1" : : "a" (data), "d" (port));
 }
 
-static inline void
-outw(u16 port, u16 data)
-{
+static inline void outw(u16 port, u16 data){
   asm volatile("out %0,%1" : : "a" (data), "d" (port));
 }
 
-static inline void
-outsl(int port, const void *addr, int cnt)
-{
+static inline void outsl(int port, const void *addr, int cnt){
   asm volatile("cld; rep outsl" :
                "=S" (addr), "=c" (cnt) :
                "d" (port), "0" (addr), "1" (cnt) :
                "cc");
 }
 
-static inline void
-stosb(void *addr, int data, int cnt)
-{
+static inline void stosb(void *addr, int data, int cnt){
   asm volatile("cld; rep stosb" :
                "=D" (addr), "=c" (cnt) :
                "0" (addr), "1" (cnt), "a" (data) :
                "memory", "cc");
 }
 
-static inline void
-stosl(void *addr, int data, int cnt)
-{
+static inline void stosl(void *addr, int data, int cnt){
   asm volatile("cld; rep stosl" :
                "=D" (addr), "=c" (cnt) :
                "0" (addr), "1" (cnt), "a" (data) :
@@ -59,9 +45,7 @@ stosl(void *addr, int data, int cnt)
 
 struct segdesc;
 
-static inline void
-lgdt(struct segdesc *p, int size)
-{
+static inline void lgdt(struct segdesc *p, int size){
   volatile u16 pd[5];
 
   pd[0] = size-1;
@@ -74,9 +58,7 @@ lgdt(struct segdesc *p, int size)
 
 struct gatedesc;
 
-static inline void
-lidt(struct gatedesc *p, int size)
-{
+static inline void lidt(struct gatedesc *p, int size){
   volatile u16 pd[5];
 
   pd[0] = size-1;
@@ -84,49 +66,40 @@ lidt(struct gatedesc *p, int size)
   pd[2] = (u64)p >> 16;
   pd[3] = (u64)p >> 32;
   pd[4] = (u64)p >> 48;
+  asm volatile("lidt (%0)" : : "r" (pd));
 }
 
-static inline void
-ltr(u16 sel)
-{
+static inline void ltr(u16 sel){
   asm volatile("ltr %0" : : "r" (sel));
 }
 
-static inline u64
-readeflags(void)
-{
+static inline u64 readeflags(void){
   u64 eflags;
   asm volatile("pushf; pop %0" : "=r" (eflags));
   return eflags;
 }
 
-static inline void
-loadgs(u16 v)
-{
+static inline void loadgs(u16 v){
   asm volatile("movw %0, %%gs" : : "r" (v));
 }
 
-static inline void
-cli(void)
-{
+static inline void loadss(u16 v){
+  asm volatile("movw %0, %%ss" : : "r" (v));
+}
+
+static inline void cli(void){
   asm volatile("cli");
 }
 
-static inline void
-sti(void)
-{
+static inline void sti(void){
   asm volatile("sti");
 }
 
-static inline void
-hlt(void)
-{
+static inline void hlt(void){
   asm volatile("hlt");
 }
 
-static inline u32
-xchg(volatile u32 *addr, u64 newval)
-{
+static inline u32 xchg(volatile u32 *addr, u64 newval){
   u64 result;
   
   // The + in "+m" denotes a read-modify-write operand.
@@ -137,17 +110,13 @@ xchg(volatile u32 *addr, u64 newval)
   return result;
 }
 
-static inline u64
-rcr2(void)
-{
+static inline u64 rcr2(void){
   u64 val;
   asm volatile("mov %%cr2,%0" : "=r" (val));
   return val;
 }
 
-static inline void
-lcr3(u64 val) 
-{
+static inline void lcr3(u64 val) {
   asm volatile("mov %0,%%cr3" : : "r" (val));
 }
 

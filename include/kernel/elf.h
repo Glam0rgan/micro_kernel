@@ -1,7 +1,7 @@
 // Format of an ELF executable file
 #include <types.h>
 
-#define ELF_MAGIC 0x7F454C46U  // "\x7FELF" in little endian
+#define ELF_MAGIC 0x464C457FU
 
 // File header
 typedef struct _ElfHdr {
@@ -23,7 +23,7 @@ typedef struct _ElfHdr {
 }ElfHdr;
 
 // Program section header
-#if X64
+
 struct ProgHdr {
   u32 type;
   u32 flags;
@@ -34,18 +34,6 @@ struct ProgHdr {
   u64 memsz;
   u64 align;
 };
-#else
-typedef struct _ProgHdr {
-  u32 type;
-  u32 off;
-  u32 vaddr;
-  u32 paddr;
-  u32 filesz;
-  u32 memsz;
-  u32 flags;
-  u32 align;
-}ProgHdr;
-#endif
 
 // Values for Proghdr type
 #define ELF_PROG_LOAD           1
