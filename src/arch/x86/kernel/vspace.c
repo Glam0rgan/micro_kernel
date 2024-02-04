@@ -5,6 +5,13 @@
 #include <kernel/vspace.h>
 #include <constants.h>
 
+// Return ipc_buffer at 0x2000.
+u64* PURE lookup_ipc_buffer(bool isReceiver, Tcb* thread){
+  
+  return thread->tcbIPCBuffer;
+}
+
+/*
 // Use tcb to get 
 u64* PURE lookup_ipc_buffer(bool isReceiver, Tcb* thread) {
   u64 w_bufferPtr;
@@ -42,3 +49,4 @@ u64* PURE lookup_ipc_buffer(bool isReceiver, Tcb* thread) {
     return NULL;
   }
 }
+*/

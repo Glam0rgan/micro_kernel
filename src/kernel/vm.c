@@ -114,7 +114,7 @@ void user_switch_vm(Tcb* thread) {
   //panic("error");
 }
 
-// Return the address of the PTE in pml4
+// Return the physical address in pml4
 // that corresponds to virtual address va. If alloc!=0,
 // create any required page table pages.
 static u64* page_walk(u64* pml4e, const void* va, int alloc) {
@@ -232,6 +232,65 @@ static u64* page_walk_return_pte(u64* pml4e, const void* va, int alloc) {
 
 
   return &pte[PTX(va)];
+}
+
+u64* page_walk_for_others(u64* pml4e, const void* va, int alloc) {
+
+  u64* pdpte, * pde, * pte;
+
+  /*
+  if(!(*pml4e & PTE_P)) {
+    if(!alloc || (pml4e = (u64*)memblock_alloc_kernel(512, 512)) == 0)
+      return 0;
+    memset(pml4e, 0, 512);
+  }
+  */
+
+
+  // Page directory pointer index
+  pdpte = p2v(pml4e[PML4X(va)]);
+
+  if (!((uint64_t)pdpte & PTE_P)) {
+    //panic("??");
+
+    if (!alloc || (pdpte = (u64*)memblock_alloc_kernel(PGSIZE, PGSIZE)) == 0)
+      return 0;
+    memset(pdpte, 0, 512);
+    pml4e[PML4X(va)] = v2p(pdpte) | PTE_P | PTE_W | PTE_U;
+  }
+  pdpte = PTE_ADDR(pdpte);
+
+  // Page directory index
+  pde = p2v(pdpte[PDPTX(va)]);
+
+  if (!((uint64_t)pde & PTE_P)) {
+    //panic("???");
+    if (!alloc || (pde = (u64*)memblock_alloc_kernel(PGSIZE, PGSIZE)) == 0)
+      return 0;
+    memset(pde, 0, 512);
+    pdpte[PDPTX(va)] = v2p(pde) | PTE_P | PTE_W | PTE_U;
+  }
+  pde = PTE_ADDR(pde);
+
+
+  // Page table index
+
+  pte = p2v(pde[PDX(va)]);
+  //cprintf("pte : %l\n", (uint64_t)pte);
+  if (!((uint64_t)pte & PTE_P)) {
+    //panic("????");
+    if (!alloc || (pte = (u64*)memblock_alloc_kernel(PGSIZE, PGSIZE)) == 0)
+      return 0;
+    memset(pte, 0, 512);
+    pde[PDX(va)] = v2p(pte) | PTE_P | PTE_W | PTE_U;
+  }
+  pte = PTE_ADDR(pte);
+
+  //cprintf("va pdx : %x %d\n",va,PTX(va));
+
+  u64* pg = (pte[PTX(va)] & 0xFFFFFFFFFFFFF000) | OFFSET(va);
+  //cprintf("pg : %l\n", pg);
+  return pg;
 }
 
 // Create PTEs for virtual addresses starting at va that refer to

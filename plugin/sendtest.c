@@ -4,7 +4,7 @@ void main(void) {
     OsMessageInfo msg;
     msg.capsUnwrapped = 0;
     msg.label = 1;
-    msg.extraCaps = 0;
+    msg.extraCaps = 0; 
     msg.length = 1;
     OsWord id = 155;
     OsIPCBuffer* bufferPoint = 0x2000;

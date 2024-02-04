@@ -352,7 +352,7 @@ struct _Tcb {
 
   u64 tcbFaultHandler;
 
-  u64 tcbIPCBuffer;
+  u64* tcbIPCBuffer;
 
   struct _Tcb* tcbSchedNext;
   struct _Tcb* tcbSchedPrev;

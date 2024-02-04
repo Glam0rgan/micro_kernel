@@ -11,6 +11,7 @@ blockSize = 512
 def move_elf(filename):
     global nblocks
     global blockSize
+    print(filename)
     stats = os.stat(root_dir+"/"+filename)
     blocknum = stats.st_size//blockSize
     if stats.st_size%blockSize != 0 :

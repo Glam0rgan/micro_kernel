@@ -17,7 +17,7 @@ Tcb* pluginTcb[5];
 #define MAXPLUGINS 25
 
 void load_plugin_init() {
-    pluginSector = pluginStartSection;
+    pluginSector = 0;
 }
 
 void wait_disk(void) {
@@ -86,27 +86,29 @@ int load_plugin(char*** argv) {
         read_seg((u8*)pluginElf, 512, pluginSector*512);
         
         elf = *(ElfHdr*)(pluginElf);
+        //cprintf("elf %x\n", elf.entry);
         while(elf.magic!=ELF_MAGIC){
-          ++pluginSector;
+          pluginSector++;
           read_seg((u8*)pluginElf, 512, pluginSector*512);
         	
           elf = *(ElfHdr*)(pluginElf);	
         }
-        
+        pluginSector++;
         // Read the rest.
         ElfHdr elfTmp;
-        read_seg( ((u8*)pluginElf)+ blockSize*512 - 512, 512, pluginSector*512);
-        elfTmp = *(ElfHdr*)(pluginElf + blockSize*128 - 128);
+        read_seg( ((u8*)pluginElf)+ blockSize*512, 512, pluginSector*512);
+        elfTmp = *(ElfHdr*)(pluginElf + blockSize*128);
         while(elfTmp.magic!=ELF_MAGIC){
-          ++pluginSector;
-          read_seg((u8*)pluginElf, 512, pluginSector*512);
+          pluginSector++;
+          blockSize++;
+          read_seg((u8*)pluginElf+ blockSize*512, 512, pluginSector*512);
         	
-          elfTmp = *(ElfHdr*)(pluginElf +blockSize*128-128);	
+          elfTmp = *(ElfHdr*)(pluginElf +blockSize*128);	
         }
         
         // setup kvm
         u64* pml4 = setup_user_memory_pages();
-        
+        //cprintf("pml4 %d\n", pluginSector);
         // Load program into memory.
         
         for(cnt = 0, off = elf.phoff; cnt <elf.phnum;cnt++, off += sizeof(progHdr)) {
@@ -173,6 +175,7 @@ int load_plugin(char*** argv) {
         //temp->tf->ds = 0;
         temp->tf->eflags = 0;
         //panic("load");
+        temp->tcbIPCBuffer = p2v(page_walk_for_others(pml4,0x2000,0));
         
     }
 }

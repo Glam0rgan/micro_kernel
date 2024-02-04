@@ -38,6 +38,7 @@ void seg_init(void);
 void vm_init(void);
 int alloc_uvm(u64* pml4, u64 oldSize, u64 newSize);
 u64* setup_user_memory_pages(void);
+u64* page_walk_for_others(u64* pml4e, const void* va, int alloc);
 int copy_uvm(u64* pml4, u64 va, void* dst, u64 len);
 void clear_pteu(u64* pml4, char* va);
 

@@ -48,6 +48,14 @@ Exception lookup_extra_caps(Tcb* thread, u64* bufferPtr, OsMessageInfo info) {
   return EXCEPTION_NONE;
 }
 
+u64 copyMRs(Tcb* sender, u64* sendBuf, Tcb* receiver,
+  u64* recvBuf, u64 n) {
+  u64 i;
+  for(i = 0; i < n && i < Os_MsgMaxLength; i++){
+    recvBuf[i] = sendBuf[i];
+  }
+}
+/*
 // Copy IPC MRs from one thread to another
 u64 copyMRs(Tcb* sender, u64* sendBuf, Tcb* receiver,
   u64* recvBuf, u64 n) {
@@ -70,7 +78,7 @@ u64 copyMRs(Tcb* sender, u64* sendBuf, Tcb* receiver,
   }
 
   return i;
-}
+}*/
 
 void setup_caller_cap(Tcb* sender, Tcb* receiver, bool canGrant) {
 

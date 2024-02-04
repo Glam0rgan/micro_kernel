@@ -101,9 +101,10 @@ void do_normal_transfer(Tcb* sender, u64* sendBuffer, Endpoint* endpoint,
   OsMessageInfo tag;
   Exception status;
 
-  tag = messageinfo_from_u64(get_register(sender, msgInfoRegister));
+  tag = messageinfo_from_u64(sender->tf->rsi);
+  //tag = messageinfo_from_u64(get_register(sender, msgInfoRegister));
 
-  if(canGrant) { // If sender grant capabilities to receiver
+  if(canGrant == false) { // If sender grant capabilities to receiver
 
     // Get the extra_caps from sender.
     status = lookup_extra_caps(sender, sendBuffer, tag);
@@ -117,7 +118,7 @@ void do_normal_transfer(Tcb* sender, u64* sendBuffer, Endpoint* endpoint,
   }
 
   // Copy sendBuffer to receiveBuffer.
-  msgTransferred = copyMRs(sender, sendBuffer, receiver, receiveBuffer,
+  msgTransferred = copyMRs(sender, sendBuffer+1, receiver, receiveBuffer+1,
     tag.length);
 
   tag = transfer_caps(tag, endpoint, receiver, receiveBuffer);
@@ -154,6 +155,7 @@ void switch_to_thread(Tcb* thread) {
   NODE_STATE(ksCurThread) = thread;
   
   user_switch_vm(thread);
+  //cprintf("thread->pml4 %l\n", thread->pml4);
   //panic("switch_to_thread");
   swtch( &oldThread->context, thread->context);
   //panic("asd");

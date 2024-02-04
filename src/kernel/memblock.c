@@ -324,9 +324,9 @@ int memblock_free(u64 base, u64 size) {
 void print_memblock(struct memblock_type* type) {
   int i = 0;
   struct memblock_region* rgn;
-  cprintf("memblock\n");
+  cprintf("memblock_init\n");
   for_each_memblock_type(i, type, rgn) {
-    cprintf("%l %l\n", rgn->base, rgn->base + rgn->size);
+    cprintf("start : %l  end : %l\n", rgn->base, rgn->base + rgn->size);
   }
 }
 

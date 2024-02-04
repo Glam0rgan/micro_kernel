@@ -5,7 +5,10 @@
 #include <memlayout.h>
 #include <mmu.h>
 #include <proc.h>
+#include <kernel/thread.h>
 #include <object/structures.h>
+
+extern Tcb* ksCurThread;
 
 int sys_test(void) {
     test();
@@ -26,8 +29,7 @@ int sys_send(void) {
     arg_uint64(0, &temp);
     ptr = (OsCPtr)temp;
 
-    arg_uint64(1, &temp);
-    msg = *(OsMessageInfo*)&temp;
+    msg = *(OsMessageInfo*)(&ksCurThread->tf->rsi);
 
     send(ptr, msg);
     return 0;

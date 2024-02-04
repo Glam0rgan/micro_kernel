@@ -86,7 +86,7 @@ void ipc_test(void) {
   // Allocate caps by root_task (need capdl).
   // Create endpoint and endpointcap.
   Endpoint* endpointTest = memblock_alloc_kernel(PGSIZE, PGSIZE);
-  endpointTest->state = EPState_Send;
+  endpointTest->state = EPState_Idle;
   //cprintf("endpoint %l\n", endpointTest);
   //panic("asd");
   Cap capTest = create_object(osEndpointObject, endpointTest, 0ul, false);
@@ -110,21 +110,29 @@ int main(void) {
   // Init kernel.
   memblock_init();
 
+  cprintf("lapic init\n");
   lapic_init();
+  
+  cprintf("segment init\n");
   seg_init();
   //panic("seg");
+  
+  cprintf("ioapic init\n");
   ioapic_init();
 
   //console_init();
 
+  cprintf("vm init\n");
   vm_init();
   //panic("vm init");
 
   ksReadyQueues.head = NULL;
   ksReadyQueues.end = NULL;
 
+  cprintf("ipc init\n");
   ipc_test();
 
+  cprintf("load plugin\n");
   char*** pluginArgv;
   load_plugin(pluginArgv);
 
@@ -132,7 +140,9 @@ int main(void) {
   ksCurThread = memblock_alloc_kernel(PGSIZE, PGSIZE);
   ksCurThread->context = memblock_alloc_kernel(PGSIZE, PGSIZE);
 
+  cprintf("schedule...\n");
   for (;;) {
+    
     ksSchedulerAction = SchedulerAction_ChooseNewThread;
     schedule();
   }

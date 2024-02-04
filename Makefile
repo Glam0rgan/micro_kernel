@@ -49,12 +49,12 @@ KOBJ := \
 	kobj/object_objecttype.o\
 	kobj/object_tcb.o\
 	kobj/api_faults.o\
+	kobj/x86_kernel_vspace.o\
 	kobj/x86_64_kernel_thread.o\
 	kobj/x86_64_kernel_trapasm.o\
 	kobj/x86_64_kernel_vspace.o\
 	kobj/x86_64_machine_registerset.o\
 	kobj/x86_64_model_statedata.o\
-	kobj/x86_kernel_vspace.o\
 	kobj/x86_machine_registerset.o\
 	kobj/model_statedata.o\
 	kobj/vectors.o
@@ -236,8 +236,12 @@ uobj/usys.o: src/kernel/usys.S
 CPLUGINS=\
 	plugin/sendtest.c\
 	plugin/receivetest.c\
+ 
+uobj/Asendtest.o: plugin/sendtest.c
+	@mkdir -p uobj
+	$(CC) $(CFLAGS) $(IFLAGS) -c -o $@ $<
 
-uobj/%.o: $(CPLUGINS)
+uobj/Breceivetest.o: plugin/receivetest.c
 	@mkdir -p uobj
 	$(CC) $(CFLAGS) $(IFLAGS) -c -o $@ $<
 	
@@ -253,8 +257,8 @@ out/vectors.S: $(MKVECTORS)
 	perl $(MKVECTORS) > out/vectors.S	
 	
 PLUGINS=\
-	fs/sendtest\
-	fs/reveivetest\
+	fs/Asendtest\
+	fs/Breceivetest\
 
 out/fs.img : $(PLUGINS)
 	dd if=/dev/zero of=out/os.img count=10000

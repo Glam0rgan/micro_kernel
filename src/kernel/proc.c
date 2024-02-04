@@ -15,7 +15,7 @@ extern void trapret(void);
 void forkret(void){
   // release lock
   
-  cprintf("forkret\n");
+  cprintf("forkret means return to the user mode\n");
   //
   
   //panic("forkret");
@@ -66,5 +66,5 @@ void receive(OsCPtr dest, OsMessageInfo* msgInfo) {
 }
 
 void print(u64 num) {
-  cprintf("num is %l\n", num);
+  cprintf("num is %d\n", num);
 }

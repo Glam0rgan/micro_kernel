@@ -1,14 +1,14 @@
 // The local APIC manages internal (non-I/O) interrupts.
 // See Chapter 8 & Appendix C of Intel processor manual volume 3.
 
-#include "types.h"
-#include "defs.h"
-#include "memlayout.h"
-#include "traps.h"
-#include "mmu.h"
-#include "x86.h"
-#include "param.h"
-#include "proc.h"
+#include <types.h>
+#include <defs.h>
+#include <memlayout.h>
+#include <traps.h>
+#include <mmu.h>
+#include <x86.h>
+#include <param.h>
+#include <proc.h>
 
 // Local APIC registers, divided by 4 for use as u64[] indices.
 #define ID      (0x0020/4)   // ID
@@ -49,6 +49,7 @@ static void lapicw(int index, int value) {
 }
 
 void lapic_init(void) {
+
     if (!lapic)
         return;
 

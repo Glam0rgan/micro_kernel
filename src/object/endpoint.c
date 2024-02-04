@@ -88,7 +88,7 @@ void receive_ipc(Tcb* thread, Cap cap, bool isBlocking) {
   
   TcbQueue queue;
   
-  epptr = EP_PTR(endpointCap.capEPPtr);
+  epptr = EP_PTR(endpointCap.capEPPtr | 0xFFFF000000000000);
 
   ntfnPtr = thread->tcbBoundNotification;
   if(ntfnPtr && ntfnPtr->state == NtfnState_Active) {
