@@ -15,7 +15,7 @@ int sys_test(void) {
     return 0;
 }
 
-int sys_exit(void){
+int sys_exit(void) {
     exit();
     return 0;
 }
@@ -35,11 +35,11 @@ int sys_send(void) {
     return 0;
 }
 
-int sys_print(void){
-   uint64_t num;
-   arg_uint64(0, &num);
-   
-   print(num);
+int sys_print(void) {
+    uint64_t num;
+    arg_uint64(0, &num);
+
+    print(num);
 }
 
 int sys_receive(void) {
@@ -56,4 +56,11 @@ int sys_receive(void) {
 
     receive(ptr, msg);
     return 0;
+}
+
+uint64_t sys_brk(void) {
+    uint64_t num;
+    arg_uint64(0, &num);
+
+    return brk(num);
 }

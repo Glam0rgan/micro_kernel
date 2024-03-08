@@ -49,7 +49,8 @@ static int (*syscalls[])(void) = {
   [SYS_send]    sys_send,
   [SYS_receive] sys_receive,
   [SYS_exit]    sys_exit,
-  [SYS_print]   sys_print
+  [SYS_print]   sys_print,
+  [SYS_brk]     sys_brk
 };
 
 void syscall(void) {

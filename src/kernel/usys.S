@@ -26,6 +26,11 @@ exit:
   movl $5, %eax;
   int $T_SYSCALL;
   ret
+.global brk;
+brk:
+  movl $6, %eax;
+  int $T_SYSCALL;
+  ret
 
 
 

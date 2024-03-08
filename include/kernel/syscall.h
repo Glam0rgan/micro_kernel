@@ -6,3 +6,4 @@
 #define SYS_receive 3
 #define SYS_print   4
 #define SYS_exit    5
+#define SYS_brk     6

@@ -12,44 +12,48 @@
 
 extern void trapret(void);
 
-void forkret(void){
+void forkret(void) {
   // release lock
-  
+
   cprintf("forkret means return to the user mode\n");
   //
-  
+
   //panic("forkret");
 }
 
-void alloc_proc(Tcb* tcb){
-  
+void alloc_proc(Tcb* tcb) {
+
   char* sp;
 
-  tcb->kStack = memblock_alloc_kernel(PGSIZE,PGSIZE);
-  
+  tcb->kStack = memblock_alloc_kernel(PGSIZE, PGSIZE);
+
   sp = tcb->kStack + PGSIZE;
-  
+
   // Leave room for trap frame.
-  sp -= sizeof *tcb->tf;
+  sp -= sizeof * tcb->tf;
   tcb->tf = (Trapframe*)sp;
-  
+
   // Set up new context to start executing at forkret,
   // which returns to trapret.
   sp -= sizeof(uint64_t);
   *(uint64_t*)sp = (uint64_t)trapret;
-  
-  sp-= sizeof *tcb->context;
-  tcb->context = (Context*) sp;
-  memset(tcb->context,0,sizeof *tcb->context);
-  tcb->context->rip = (uint64_t)forkret; 
+
+  sp -= sizeof * tcb->context;
+  tcb->context = (Context*)sp;
+  memset(tcb->context, 0, sizeof * tcb->context);
+  tcb->context->rip = (uint64_t)forkret;
 }
 
 void test() {
   cprintf("test!!!\n");
 }
 
-void exit(){
+void exit() {
   sched();
+}
+
+uint64_t brk(uint64_t num) {
+  return memblock_alloc(num, PGSIZE);
 }
 
 void send(OsCPtr dest, OsMessageInfo msgInfo) {
