@@ -1,0 +1,18 @@
+workspace = { members = ["src/ide_driver"] }
+[package]
+name = "plugin_rust"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+
+[[bin]]
+name = "memory_allocator"
+path = "src/memory_allocator/bin/main.rs"
+
+[[bin]]
+name = "file_system"
+path = "src/file_system/bin/main.rs"
+
