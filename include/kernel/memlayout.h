@@ -6,12 +6,14 @@
 #define DEVBASE       0xFFFFFFFF40000000 // First device virtual address
 #define ARDSOFFSET    0x8000                     // ARDS offset
 
+#define USERMAX       0x00007fffffffffff
+
 #define KERNLINK (KERNBASE+EXTMEM)  // Address where kernel is linked
 
 #ifndef __ASSEMBLER__
 
-static inline u64 v2p(void *a) { return ((u64) (a)) - ((u64)KERNBASE); }
-static inline void *p2v(u64 a) { return (void *) ((a) + ((u64)KERNBASE)); }
+static inline u64 v2p(void* a) { return ((u64)(a)) - ((u64)KERNBASE); }
+static inline void* p2v(u64 a) { return (void*)((a)+((u64)KERNBASE)); }
 
 #endif
 

@@ -49,7 +49,7 @@ void seg_init(void) {
   int n;
   memset(idt, 0, PGSIZE * 4);
 
-  for (n = 0; n < 256; n++)
+  for(n = 0; n < 256; n++)
     mkgate(idt, n, vectors[n], 0, 0);
   mkgate(idt, 64, vectors[64], 3, 1);
 
@@ -133,10 +133,10 @@ static u64* page_walk(u64* pml4e, const void* va, int alloc) {
   // Page directory pointer index
   pdpte = p2v(pml4e[PML4X(va)]);
 
-  if (!((uint64_t)pdpte & PTE_P)) {
+  if(!((uint64_t)pdpte & PTE_P)) {
     //panic("??");
 
-    if (!alloc || (pdpte = (u64*)memblock_alloc_kernel(PGSIZE, PGSIZE)) == 0)
+    if(!alloc || (pdpte = (u64*)memblock_alloc_kernel(PGSIZE, PGSIZE)) == 0)
       return 0;
     memset(pdpte, 0, 512);
     pml4e[PML4X(va)] = v2p(pdpte) | PTE_P | PTE_W | PTE_U;
@@ -146,9 +146,9 @@ static u64* page_walk(u64* pml4e, const void* va, int alloc) {
   // Page directory index
   pde = p2v(pdpte[PDPTX(va)]);
 
-  if (!((uint64_t)pde & PTE_P)) {
+  if(!((uint64_t)pde & PTE_P)) {
     //panic("???");
-    if (!alloc || (pde = (u64*)memblock_alloc_kernel(PGSIZE, PGSIZE)) == 0)
+    if(!alloc || (pde = (u64*)memblock_alloc_kernel(PGSIZE, PGSIZE)) == 0)
       return 0;
     memset(pde, 0, 512);
     pdpte[PDPTX(va)] = v2p(pde) | PTE_P | PTE_W | PTE_U;
@@ -160,9 +160,9 @@ static u64* page_walk(u64* pml4e, const void* va, int alloc) {
 
   pte = p2v(pde[PDX(va)]);
   //cprintf("pte : %l\n", (uint64_t)pte);
-  if (!((uint64_t)pte & PTE_P)) {
+  if(!((uint64_t)pte & PTE_P)) {
     //panic("????");
-    if (!alloc || (pte = (u64*)memblock_alloc_kernel(PGSIZE, PGSIZE)) == 0)
+    if(!alloc || (pte = (u64*)memblock_alloc_kernel(PGSIZE, PGSIZE)) == 0)
       return 0;
     memset(pte, 0, 512);
     pde[PDX(va)] = v2p(pte) | PTE_P | PTE_W | PTE_U;
@@ -195,9 +195,9 @@ static u64* page_walk_return_pte(u64* pml4e, const void* va, int alloc) {
   // Page directory pointer index
   pdpte = p2v(pml4e[PML4X(va)]);
 
-  if (!((uint64_t)pdpte & PTE_P)) {
+  if(!((uint64_t)pdpte & PTE_P)) {
 
-    if (!alloc || (pdpte = (u64*)memblock_alloc_kernel(PGSIZE, PGSIZE)) == 0)
+    if(!alloc || (pdpte = (u64*)memblock_alloc_kernel(PGSIZE, PGSIZE)) == 0)
       return 0;
     memset(pdpte, 0, 512);
     pml4e[PML4X(va)] = v2p(pdpte) | PTE_P | PTE_W | PTE_U;
@@ -207,9 +207,9 @@ static u64* page_walk_return_pte(u64* pml4e, const void* va, int alloc) {
   // Page directory index
   pde = p2v(pdpte[PDPTX(va)]);
 
-  if (!((uint64_t)pde & PTE_P)) {
+  if(!((uint64_t)pde & PTE_P)) {
 
-    if (!alloc || (pde = (u64*)memblock_alloc_kernel(PGSIZE, PGSIZE)) == 0)
+    if(!alloc || (pde = (u64*)memblock_alloc_kernel(PGSIZE, PGSIZE)) == 0)
       return 0;
     memset(pde, 0, 512);
     pdpte[PDPTX(va)] = v2p(pde) | PTE_P | PTE_W | PTE_U;
@@ -221,9 +221,9 @@ static u64* page_walk_return_pte(u64* pml4e, const void* va, int alloc) {
 
   pte = p2v(pde[PDX(va)]);
 
-  if (!((uint64_t)pte & PTE_P)) {
+  if(!((uint64_t)pte & PTE_P)) {
 
-    if (!alloc || (pte = (u64*)memblock_alloc_kernel(PGSIZE, PGSIZE)) == 0)
+    if(!alloc || (pte = (u64*)memblock_alloc_kernel(PGSIZE, PGSIZE)) == 0)
       return 0;
     memset(pte, 0, 512);
     pde[PDX(va)] = v2p(pte) | PTE_P | PTE_W | PTE_U;
@@ -250,10 +250,10 @@ u64* page_walk_for_others(u64* pml4e, const void* va, int alloc) {
   // Page directory pointer index
   pdpte = p2v(pml4e[PML4X(va)]);
 
-  if (!((uint64_t)pdpte & PTE_P)) {
+  if(!((uint64_t)pdpte & PTE_P)) {
     //panic("??");
 
-    if (!alloc || (pdpte = (u64*)memblock_alloc_kernel(PGSIZE, PGSIZE)) == 0)
+    if(!alloc || (pdpte = (u64*)memblock_alloc_kernel(PGSIZE, PGSIZE)) == 0)
       return 0;
     memset(pdpte, 0, 512);
     pml4e[PML4X(va)] = v2p(pdpte) | PTE_P | PTE_W | PTE_U;
@@ -263,9 +263,9 @@ u64* page_walk_for_others(u64* pml4e, const void* va, int alloc) {
   // Page directory index
   pde = p2v(pdpte[PDPTX(va)]);
 
-  if (!((uint64_t)pde & PTE_P)) {
+  if(!((uint64_t)pde & PTE_P)) {
     //panic("???");
-    if (!alloc || (pde = (u64*)memblock_alloc_kernel(PGSIZE, PGSIZE)) == 0)
+    if(!alloc || (pde = (u64*)memblock_alloc_kernel(PGSIZE, PGSIZE)) == 0)
       return 0;
     memset(pde, 0, 512);
     pdpte[PDPTX(va)] = v2p(pde) | PTE_P | PTE_W | PTE_U;
@@ -277,9 +277,9 @@ u64* page_walk_for_others(u64* pml4e, const void* va, int alloc) {
 
   pte = p2v(pde[PDX(va)]);
   //cprintf("pte : %l\n", (uint64_t)pte);
-  if (!((uint64_t)pte & PTE_P)) {
+  if(!((uint64_t)pte & PTE_P)) {
     //panic("????");
-    if (!alloc || (pte = (u64*)memblock_alloc_kernel(PGSIZE, PGSIZE)) == 0)
+    if(!alloc || (pte = (u64*)memblock_alloc_kernel(PGSIZE, PGSIZE)) == 0)
       return 0;
     memset(pte, 0, 512);
     pde[PDX(va)] = v2p(pte) | PTE_P | PTE_W | PTE_U;
@@ -306,15 +306,15 @@ static int map_pages(u64* pml4, void* va, u64 size, u64 pa, int perm) {
   //cprintf("first = %l\n", first);
   //cprintf("last = %l\n", last);
 
-  while (1) {
-    if ((pte = page_walk_return_pte(pml4, first, 1)) == 0)
+  while(1) {
+    if((pte = page_walk_return_pte(pml4, first, 1)) == 0)
       return -1;
     //cprintf("%l\n", *pte);
-    if (*pte & PTE_P)
+    if(*pte & PTE_P)
       panic("remap");
     *pte = pa | perm | PTE_P;
     //cprintf("*pte %l\n", *pte);
-    if (first == last)
+    if(first == last)
       break;
     first += PGSIZE;
     pa += PGSIZE;
@@ -346,15 +346,30 @@ u64* setup_user_memory_pages(void) {
 int alloc_uvm(u64* pml4, u64 oldSize, u64 newSize) {
   char* mem;
 
-  if (newSize < oldSize)
+  if(newSize < oldSize)
     return oldSize;
 
   u64 oldSizeAlign = PGROUNDUP(oldSize);
   mem = memblock_alloc(newSize - oldSize, PGSIZE);
   //cprintf("mem %l\n", p2v(mem));
   // Dealloc has memset zero.
-  for (;oldSizeAlign < newSize;oldSizeAlign += PGSIZE, mem += PGSIZE) {
+  for(;oldSizeAlign < newSize;oldSizeAlign += PGSIZE, mem += PGSIZE) {
     map_pages(pml4, (char*)oldSizeAlign, PGSIZE, mem, PTE_W | PTE_U);
+  }
+  return newSize;
+}
+
+int alloc_stack(u64* pml4, u64 oldSize, u64 newSize) {
+  char* mem;
+
+  if(newSize > oldSize)
+    return oldSize;
+
+  u64 newSizeAlign = PGROUNDUP(newSize);
+  mem = memblock_alloc(newSize - oldSize, PGSIZE);
+  // Dealloc has memset zero.
+  for(;newSizeAlign < oldSize;newSizeAlign += PGSIZE, mem += PGSIZE) {
+    map_pages(pml4, (char*)(newSizeAlign), PGSIZE, mem, PTE_W | PTE_U);
   }
   return newSize;
 }
@@ -369,7 +384,7 @@ int copy_uvm(u64* pml4, u64 va, void* src, u64 len) {
     //panic("cpoy_uvm");
   //}
   buf = (char*)src;
-  while (len > 0) {
+  while(len > 0) {
     vaAlign = (u64)PGROUNDDOWN(va);
 
     //cprintf("va %l\n",vaAlign);
@@ -379,7 +394,7 @@ int copy_uvm(u64* pml4, u64 va, void* src, u64 len) {
     //cprintf("%l\n", ka);
     //panic("asd");
     size = PGSIZE - (va - vaAlign);
-    if (size > len)
+    if(size > len)
       size = len;
 
 
@@ -406,7 +421,7 @@ void clear_pteu(u64* pml4, char* va) {
   u64* pte;
 
   pte = page_walk_return_pte(pml4, va, 0);
-  if (pte == 0)
+  if(pte == 0)
     panic("clear_pteu");
   *pte &= ~PTE_U;
 }
@@ -428,12 +443,12 @@ void vm_init(void) {
   //cprintf("pd = %l\n",*kernPd);
   kernPdpt[510] = v2p(kernPd) | PTE_W | PTE_P;
 
-  for (u64 pdOffset = 0;pdOffset < 256;pdOffset++) {
+  for(u64 pdOffset = 0;pdOffset < 256;pdOffset++) {
     kernPt = memblock_alloc_kernel(PGSIZE, PGSIZE);
     //
     kernPd[pdOffset] = v2p(kernPt) | PTE_W | PTE_P;
     //cprintf("pd = %l\n",*kernPt);
-    for (u64 ptOffset = 0;ptOffset < 512;ptOffset++) {
+    for(u64 ptOffset = 0;ptOffset < 512;ptOffset++) {
       kernPt[ptOffset] = (0x200000 * pdOffset + 0x1000 * ptOffset) | PTE_W | PTE_P;
       //if(pdOffset==0 && ptOffset < 10){
       //  cprintf("kernpt %l\n", kernPt[ptOffset]);

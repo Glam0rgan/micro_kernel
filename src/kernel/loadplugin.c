@@ -69,84 +69,85 @@ int load_plugin(char*** argv) {
     ElfHdr elf;
     // ??? 3+MAXARG+1
     u64 argc, uStack[3 + MAXARG + 1];
-    u32* pluginElf = memblock_alloc_kernel(PGSIZE*16,PGSIZE);
+    u32* pluginElf = memblock_alloc_kernel(PGSIZE * 16, PGSIZE);
     struct ProgHdr progHdr;
     int cnt, off;
     u64 size, stackPoint;
 
-    
+
     for(int i = 0;i < pluginNum;++i) {
-    	Tcb* temp = pluginTcb[i];
-    	alloc_proc(temp);
-    	
+        Tcb* temp = pluginTcb[i];
+        alloc_proc(temp);
+
         size = 4096;
-        int blockSize =1;
+        int blockSize = 1;
 
         // Get ElfHdr
-        read_seg((u8*)pluginElf, 512, pluginSector*512);
-        
+        read_seg((u8*)pluginElf, 512, pluginSector * 512);
+
         elf = *(ElfHdr*)(pluginElf);
         //cprintf("elf %x\n", elf.entry);
-        while(elf.magic!=ELF_MAGIC){
-          pluginSector++;
-          read_seg((u8*)pluginElf, 512, pluginSector*512);
-        	
-          elf = *(ElfHdr*)(pluginElf);	
+        while(elf.magic != ELF_MAGIC) {
+            pluginSector++;
+            read_seg((u8*)pluginElf, 512, pluginSector * 512);
+
+            elf = *(ElfHdr*)(pluginElf);
         }
         pluginSector++;
         // Read the rest.
         ElfHdr elfTmp;
-        read_seg( ((u8*)pluginElf)+ blockSize*512, 512, pluginSector*512);
-        elfTmp = *(ElfHdr*)(pluginElf + blockSize*128);
-        while(elfTmp.magic!=ELF_MAGIC){
-          pluginSector++;
-          blockSize++;
-          read_seg((u8*)pluginElf+ blockSize*512, 512, pluginSector*512);
-        	
-          elfTmp = *(ElfHdr*)(pluginElf +blockSize*128);	
+        read_seg(((u8*)pluginElf) + blockSize * 512, 512, pluginSector * 512);
+        elfTmp = *(ElfHdr*)(pluginElf + blockSize * 128);
+        while(elfTmp.magic != ELF_MAGIC) {
+            pluginSector++;
+            blockSize++;
+            read_seg((u8*)pluginElf + blockSize * 512, 512, pluginSector * 512);
+
+            elfTmp = *(ElfHdr*)(pluginElf + blockSize * 128);
         }
-        
+
         // setup kvm
         u64* pml4 = setup_user_memory_pages();
         //cprintf("pml4 %d\n", pluginSector);
         // Load program into memory.
-        
-        for(cnt = 0, off = elf.phoff; cnt <elf.phnum;cnt++, off += sizeof(progHdr)) {
+
+        for(cnt = 0, off = elf.phoff; cnt < elf.phnum;cnt++, off += sizeof(progHdr)) {
             progHdr = *(struct ProgHdr*)(pluginElf + off / 4);
-             
+
             if(progHdr.type != ELF_PROG_LOAD)
                 continue;
-               
+
             //u32* ttmp = pluginElf + progHdr.off/4;
-            
-            
+
+
             //for(int e=0;e<10;++e){
             //  cprintf("elf %l\n", *((uint64_t*)pluginElf + e + progHdr.off/8) );
             //}
- 
+
             size = alloc_uvm(pml4, size, progHdr.vaddr + progHdr.memsz);
-	  
+
             // Copy the code to user memory.
-            copy_uvm(pml4, progHdr.vaddr, 
-            (uint8_t*)pluginElf + progHdr.off, progHdr.memsz);
-		
+            copy_uvm(pml4, progHdr.vaddr,
+                (uint8_t*)pluginElf + progHdr.off, progHdr.memsz);
+
         }
         //panic("load");
         size = PGROUNDUP(size);
-        size = alloc_uvm(pml4, size, size + 2 * PGSIZE);
-        
+        size = USERMAX;
+        size = alloc_stack(pml4, size, size - 2 * PGSIZE);
+
         //clear_pteu(pml4, size - 2 * PGSIZE);
-        
+
         stackPoint = size;
 
-	/*
-        // Push argument strings, prepare rest of stack in userstack.
-        for(argc = 0;argv[cnt][argc];argc++) {
-            stackPoint = (stackPoint - (strlen(argv[cnt][argc]) + 1)) & ~(sizeof(u64) - 1);
-            copy_uvm(pml4, stackPoint, argv[cnt][argc], strlen(argv[cnt][argc] + 1));
-            uStack[3 + argc] = stackPoint;
-        }
-        */
+        /*
+            // Push argument strings, prepare rest of stack in userstack.
+            for(argc = 0;argv[cnt][argc];argc++) {
+                stackPoint = (stackPoint - (strlen(argv[cnt][argc]) + 1)) & ~(sizeof(u64) - 1);
+                copy_uvm(pml4, stackPoint, argv[cnt][argc], strlen(argv[cnt][argc] + 1));
+                uStack[3 + argc] = stackPoint;
+            }
+            */
         argc = 0;
         uStack[3 + argc] = 0;
 
@@ -162,20 +163,20 @@ int load_plugin(char*** argv) {
         //panic("load_p");        
         copy_uvm(pml4, stackPoint, uStack, (3 + argc + 1) * sizeof(u64));
         //panic("load_plugin");
-	temp->pml4 = pml4;
+        temp->pml4 = pml4;
         temp->size = size;
         temp->tf->rip = elf.entry;
         //cprintf("tf->rip %l\n", elf.entry);
         //panic("cc");
         temp->tf->rsp = stackPoint;
-        
-        temp->tf->cs = (SEG_UCODE << 3) | DPL_USER ;
-        
+
+        temp->tf->cs = (SEG_UCODE << 3) | DPL_USER;
+
         temp->tf->ds = (SEG_UDATA << 3) | DPL_USER;
         //temp->tf->ds = 0;
         temp->tf->eflags = 0;
         //panic("load");
-        temp->tcbIPCBuffer = p2v(page_walk_for_others(pml4,0x2000,0));
-        
+        temp->tcbIPCBuffer = p2v(page_walk_for_others(pml4, 0x2000, 0));
+
     }
 }
