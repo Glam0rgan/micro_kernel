@@ -133,6 +133,8 @@ int load_plugin(char*** argv) {
         }
         //panic("load");
         size = PGROUNDUP(size);
+        temp->size = size;
+
         size = USERMAX;
         size = alloc_stack(pml4, size, size - 2 * PGSIZE);
 
@@ -164,7 +166,7 @@ int load_plugin(char*** argv) {
         copy_uvm(pml4, stackPoint, uStack, (3 + argc + 1) * sizeof(u64));
         //panic("load_plugin");
         temp->pml4 = pml4;
-        temp->size = size;
+
         temp->tf->rip = elf.entry;
         //cprintf("tf->rip %l\n", elf.entry);
         //panic("cc");
